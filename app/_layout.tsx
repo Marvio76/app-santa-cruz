@@ -1,23 +1,12 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Stack } from 'expo-router';
 
-export default function HomeScreen() {
+export default function RootLayout() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>🏡 Tela inicial funcionando!</Text>
-    </View>
+    <Stack>
+      <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen name="login" options={{ headerShown: false }} />
+      <Stack.Screen name="register" options={{ headerShown: false }} />
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+    </Stack>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-  },
-  text: {
-    fontSize: 18,
-    fontWeight: '600',
-  },
-});
-// https://github.com/puikinsh/login-forms/blob/main/forms/material/index.html

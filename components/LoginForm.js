@@ -37,8 +37,8 @@ export default function LoginForm({ onLogin }) {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Sign in</Text>
-            <Text style={styles.subtitle}>to continue to your account</Text>
+            <Text style={styles.title}>Login</Text>
+            <Text style={styles.subtitle}>para continuar na sua conta</Text>
 
             <TextInput
                 style={[styles.input, error.email && styles.inputError]}
@@ -52,7 +52,7 @@ export default function LoginForm({ onLogin }) {
 
             <TextInput
                 style={[styles.input, error.password && styles.inputError]}
-                placeholder="Password"
+                placeholder="Senha"
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
@@ -63,7 +63,7 @@ export default function LoginForm({ onLogin }) {
                 {loading ? (
                     <ActivityIndicator color="#fff" />
                 ) : (
-                    <Text style={styles.buttonText}>SIGN IN</Text>
+                    <Text style={styles.buttonText}>LOGIN</Text>
                 )}
             </TouchableOpacity>
         </View>
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     inputError: { borderColor: '#f00' },
     error: { color: '#f00', marginBottom: 8 },
     button: {
-        backgroundColor: '#6200ee',
+        backgroundColor: '#0027a6ff',
         paddingVertical: 12,
         borderRadius: 8,
         alignItems: 'center',

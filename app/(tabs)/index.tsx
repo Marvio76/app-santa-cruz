@@ -1,17 +1,6 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Redirect } from 'expo-router';
 
-export default function IndexScreen() {
-  return (
-    <View style={styles.container}>
-      <Text>Olá, Marvio! 🚀 Tela inicial funcionando!</Text>
-    </View>
-  );
+export default function Index() {
+  // Redireciona diretamente para a tela de login
+  return <Redirect href="/login" />;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
