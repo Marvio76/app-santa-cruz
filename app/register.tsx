@@ -1,137 +1,78 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
-  View
+  View,
+  Alert
 } from 'react-native';
+import RegisterForm from '../components/ui/RegisterForm'; 
+import axios from 'axios';
+
+const API_URL = 'https://guia-santa-cruz-api.onrender.com';
 
 export default function RegisterScreen() {
   const router = useRouter();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState({ 
-    name: '', 
-    email: '', 
-    password: '', 
-    confirmPassword: '' 
-  });
+  const [registerError, setRegisterError] = useState('');
 
-  const validate = () => {
-    let valid = true;
-    const newError = { name: '', email: '', password: '', confirmPassword: '' };
+  const handleRegister = async (credentials: { nome: string; email: string; password: string }) => {
+    console.log('Tentando cadastrar com:', credentials);
+    setRegisterError('');
 
-    if (name.trim().length < 2) {
-      newError.name = 'Nome deve ter pelo menos 2 caracteres';
-      valid = false;
+    if (!credentials || !credentials.nome || !credentials.email || !credentials.password) {
+      setRegisterError('Nome, email e senha são obrigatórios.');
+      console.log('Dados de cadastro recebidos inválidos:', credentials);
+      return;
     }
 
-    if (!email.includes('@')) {
-      newError.email = 'Endereço de email inválido';
-      valid = false;
-    }
+    try {
+      // Objeto corrigido para bater com o backend (espera 'senha')
+      const dadosParaApi = {
+        nome: credentials.nome,
+        email: credentials.email,
+        senha: credentials.password 
+      };
 
-    if (password.length < 6) {
-      newError.password = 'A senha deve ter pelo menos 6 caracteres';
-      valid = false;
-    }
+      // Manda o objeto corrigido
+      const response = await axios.post(`${API_URL}/api/auth/register`, dadosParaApi); 
+      
+      console.log('API respondeu cadastro com sucesso:', response.data);
 
-    if (password !== confirmPassword) {
-      newError.confirmPassword = 'As senhas não coincidem';
-      valid = false;
-    }
-
-    setError(newError);
-    return valid;
-  };
-
-  const handleRegister = () => {
-    if (!validate()) return;
-
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      // Aqui você faria o registro na API
-      console.log('Register:', { name, email, password });
-      Alert.alert('Sucesso', 'Conta criada com sucesso!');
+      Alert.alert('Sucesso!', 'Cadastro realizado. Faça o login para continuar.');
       router.push('/login');
-    }, 2000);
+
+    } catch (error: any) {
+      console.error('Erro no cadastro:', error.response?.data || error.message);
+      const errorMessage = error.response?.data?.message || 'Erro inesperado ao tentar cadastrar.';
+      setRegisterError(errorMessage);
+    }
   };
 
   return (
-    <KeyboardAvoidingView 
+    <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.header}>
-          <Text style={styles.welcomeTitle}>Crie sua conta</Text>
-          <Text style={styles.welcomeSubtitle}>Junte-se a nós hoje</Text>
+          <Text style={styles.welcomeTitle}>Crie sua Conta</Text>
+          <Text style={styles.welcomeSubtitle}>É rápido e fácil</Text>
         </View>
 
-        <View style={styles.formContainer}>
-          <TextInput
-            style={[styles.input, error.name && styles.inputError]}
-            placeholder="Nome Completo"
-            value={name}
-            onChangeText={setName}
-            autoCapitalize="words"
-          />
-          {error.name ? <Text style={styles.error}>{error.name}</Text> : null}
+        <RegisterForm onRegister={handleRegister} />
 
-          <TextInput
-            style={[styles.input, error.email && styles.inputError]}
-            placeholder="Email"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
-          {error.email ? <Text style={styles.error}>{error.email}</Text> : null}
+        {registerError ? (
+          <Text style={styles.errorText}>{registerError}</Text>
+        ) : null}
 
-          <TextInput
-            style={[styles.input, error.password && styles.inputError]}
-            placeholder="Senha"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
-          {error.password ? <Text style={styles.error}>{error.password}</Text> : null}
-
-          <TextInput
-            style={[styles.input, error.confirmPassword && styles.inputError]}
-            placeholder="Repita sua Senha"
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            secureTextEntry
-          />
-          {error.confirmPassword ? <Text style={styles.error}>{error.confirmPassword}</Text> : null}
-
-          <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={loading}>
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.buttonText}>Confirmar Cadastro</Text>
-            )}
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.loginLink} 
-            onPress={() => router.push('/login')}
-          >
-            <Text style={styles.loginText}>
-              Já tem uma conta? <Text style={styles.loginLinkText}>Faça login</Text>
-            </Text>
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>Já tem uma conta? </Text>
+          <TouchableOpacity onPress={() => router.push('/login')}>
+            <Text style={styles.registerText}>Faça Login</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -140,82 +81,13 @@ export default function RegisterScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8f9fa',
-  },
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: 40,
-  },
-  welcomeTitle: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#0027a6ff',
-    marginBottom: 8,
-  },
-  welcomeSubtitle: {
-    fontSize: 16,
-    color: '#666',
-  },
-  formContainer: {
-    width: '90%',
-    maxWidth: 400,
-    padding: 20,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 5 },
-    shadowRadius: 10,
-    elevation: 5,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    marginBottom: 8,
-    fontSize: 16,
-  },
-  inputError: { 
-    borderColor: '#ff3b30' 
-  },
-  error: { 
-    color: '#ff3b30', 
-    fontSize: 12,
-    marginBottom: 12,
-    marginLeft: 4,
-  },
-  button: {
-    backgroundColor: '#0027a6ff',
-    paddingVertical: 14,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 10,
-    marginBottom: 16,
-  },
-  buttonText: { 
-    color: '#fff', 
-    fontWeight: '700', 
-    fontSize: 16 
-  },
-  loginLink: {
-    alignItems: 'center',
-  },
-  loginText: {
-    color: '#666',
-    fontSize: 14,
-  },
-  loginLinkText: {
-    color: '#0027a6ff',
-    fontWeight: '600',
-  },
+  container: { flex: 1, backgroundColor: '#f8f8faff' },
+  scrollContainer: { flexGrow: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
+  header: { alignItems: 'center', marginBottom: 40 },
+  welcomeTitle: { fontSize: 32, fontWeight: 'bold', color: '#0027a6ff', marginBottom: 8 },
+  welcomeSubtitle: { fontSize: 16, color: '#666' },
+  footer: { flexDirection: 'row', justifyContent: 'center', marginTop: 30, marginBottom: 20 },
+  footerText: { color: '#666', fontSize: 16 },
+  registerText: { color: '#0027a6ff', fontSize: 16, fontWeight: '600' },
+  errorText: { color: 'red', textAlign: 'center', marginTop: 15, marginBottom: 10, fontSize: 16, fontWeight: '600' },
 });
