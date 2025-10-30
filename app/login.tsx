@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -7,11 +8,9 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
-  Alert
+  View
 } from 'react-native';
-import LoginForm from '../components/ui/LoginForm'; 
-import axios from 'axios';
+import LoginForm from '../components/ui/LoginForm';
 
 const API_URL = 'https://guia-santa-cruz-api.onrender.com';
 
@@ -42,7 +41,7 @@ export default function LoginScreen() {
       console.log('API respondeu com sucesso:', response.data);
       const token = response.data.token;
       // TODO: Salvar o token (AsyncStorage)
-      router.replace('/(tabs)'); 
+      router.replace('/telaInicial');
 
     } catch (error: any) {
       console.error('Erro no login:', error.response?.data || error.message);
