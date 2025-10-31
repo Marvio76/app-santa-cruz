@@ -9,6 +9,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import MapView, { Marker } from 'react-native-maps';
 
 export default function TelaInicial() {
     const router = useRouter();
@@ -16,10 +17,47 @@ export default function TelaInicial() {
     const [isMobile, setIsMobile] = useState(false);
     const slideAnim = new Animated.Value(0);
 
+    // 📍 Lista de pontos no mapa
+    const pontos = [
+        {
+            title: 'Santa Cruz dos Milagres',
+            description: 'Piauí - Brasil',
+            latitude: -5.800790931713065,
+            longitude: -41.951456337341085,
+        },
+        {
+            title: 'Santuário de Santa Cruz dos Milagres ⛪',
+            description: 'Principal ponto turístico e religioso da cidade.',
+            latitude: -5.8015,
+            longitude: -41.952,
+        },
+        {
+            title: 'Hotel Santa Cruz 🏨',
+            description: 'Hospedagem próxima ao centro.',
+            latitude: -5.802,
+            longitude: -41.950,
+            pinColor: 'blue',
+        },
+        {
+            title: 'Farmácia Central 💊',
+            description: 'Aberta todos os dias.',
+            latitude: -5.799,
+            longitude: -41.951,
+            pinColor: 'green',
+        },
+        {
+            title: 'Restaurante 🍴',
+            description: 'Deliciosa comida local.',
+            latitude: -5.80552,
+            longitude: -41.96177,
+            pinColor: 'orange',
+        },
+    ];
+
     useEffect(() => {
         const updateLayout = () => {
             const screenWidth = Dimensions.get('window').width;
-            setIsMobile(screenWidth < 700); // se for menor que 700px = mobile
+            setIsMobile(screenWidth < 700);
         };
 
         updateLayout();
@@ -49,7 +87,7 @@ export default function TelaInicial() {
                 </TouchableOpacity>
             )}
 
-            {/* Menu lateral (com animação no mobile) */}
+            {/* Menu lateral */}
             <Animated.View
                 style={[
                     styles.sidebar,
@@ -100,12 +138,35 @@ export default function TelaInicial() {
                 <Pressable style={styles.overlay} onPress={toggleMenu} />
             )}
 
-            {/* Conteúdo principal */}
+            {/* Conteúdo principal com mapa */}
             <View style={styles.mainContent}>
-                <Text style={styles.title}>🎉 Bem-vindo à Tela Inicial!</Text>
+                <Text style={styles.title}>🗺️ Mapa de Santa Cruz dos Milagres</Text>
                 <Text style={styles.description}>
-                    Aqui você encontrará as principais informações e curiosidades sobre Santa Cruz.
+                    Veja os principais pontos turísticos, hotéis, farmácias e restaurantes.
                 </Text>
+
+                <MapView
+                    style={styles.map}
+                    initialRegion={{
+                        latitude: -5.80079,
+                        longitude: -41.95145,
+                        latitudeDelta: 0.01, // zoom próximo da cidade
+                        longitudeDelta: 0.01,
+                    }}
+                >
+                    {pontos.map((ponto, index) => (
+                        <Marker
+                            key={index}
+                            coordinate={{
+                                latitude: ponto.latitude,
+                                longitude: ponto.longitude,
+                            }}
+                            title={ponto.title}
+                            description={ponto.description}
+                            pinColor={ponto.pinColor || 'red'}
+                        />
+                    ))}
+                </MapView>
             </View>
         </View>
     );
@@ -159,21 +220,25 @@ const styles = StyleSheet.create({
     },
     mainContent: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingHorizontal: 20,
+        padding: 10,
     },
     title: {
-        fontSize: 26,
+        fontSize: 22,
         fontWeight: 'bold',
         color: '#1e3a8a',
-        marginBottom: 10,
+        marginBottom: 5,
+        textAlign: 'center',
     },
     description: {
         color: '#374151',
-        fontSize: 18,
+        fontSize: 16,
         textAlign: 'center',
-        lineHeight: 24,
+        marginBottom: 10,
+    },
+    map: {
+        width: '100%',
+        height: '85%',
+        borderRadius: 15,
     },
     menuButton: {
         position: 'absolute',
