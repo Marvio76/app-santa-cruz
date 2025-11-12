@@ -2,7 +2,7 @@
 
 Aplicativo (React Native + Expo) de guia turístico e comercial para a cidade de Santa Cruz dos Milagres. Este repositório contém o **Frontend (o Aplicativo)**.
 
-O cérebro (API Node.js) desse projeto está em outro repositório: [LINK-DO-REPO-DA-API-AQUI]
+O cérebro (API Node.js) desse projeto está em outro repositório: [https://github.com/Felype-cybher/guia_santa_cruz_api.git]
 
 ---
 
@@ -35,7 +35,7 @@ O cérebro (API Node.js) desse projeto está em outro repositório: [LINK-DO-REP
 
 1.  **Clone o repositório:**
     ```bash
-    git clone [LINK-DO-TEU-REPO-GIT-AQUI]
+    git clone [https://github.com/Marvio76/app-santa-cruz.git]
     cd app-santa-cruz
     ```
 
