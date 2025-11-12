@@ -1,50 +1,51 @@
-# Welcome to your Expo app 👋
+# 🚀 Projeto Guia Santa Cruz (Aplicativo)
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Aplicativo (React Native + Expo) de guia turístico e comercial para a cidade de Santa Cruz dos Milagres. Este repositório contém o **Frontend (o Aplicativo)**.
 
-## Get started
+O cérebro (API Node.js) desse projeto está em outro repositório: [LINK-DO-REPO-DA-API-AQUI]
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## ✨ Features Atuais (O que já tá funcionando)
 
-2. Start the app
+* [x] Autenticação de Usuário (Login e Cadastro)
+* [x] Visualização do Mapa com locais (HU5) - *Status: Dados Mockados (JSON)*
+* [x] Filtro de Locais por Categoria (HU6)
+* [x] Detalhes do Local (em `Alert`) (HU8)
+* [x] Layout do Menu de Navegação (Tabs)
+* [x] Layout da Barra de Busca (HU7 - Visual)
+* [ ] **(Próximo):** `HU7 (Lógica)`: Fazer a Busca funcionar.
+* [ ] `HU3`: Formulário de Submissão de Local (Dono)
+* [ ] `HU4`: Painel de Validação (Admin)
+* [ ] `HU8 (Refatoração)`: Tela de Detalhes Completa
 
-   ```bash
-   npx expo start
-   ```
+---
 
-In the output, you'll find options to open the app in a
+## 🛠️ Tecnologias Utilizadas
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+* **React Native** (com **Expo**)
+* **Expo Router** (para navegação)
+* **Axios** (para chamar a API)
+* **React Native Maps** (para o mapa)
+* **TypeScript**
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+---
 
-## Get a fresh project
+## 🏁 Como Rodar (Instalação)
 
-When you're ready, run:
+1.  **Clone o repositório:**
+    ```bash
+    git clone [LINK-DO-TEU-REPO-GIT-AQUI]
+    cd app-santa-cruz
+    ```
 
-```bash
-npm run reset-project
-```
+2.  **Instale as dependências:**
+    ```bash
+    npm install
+    ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+3.  **Execute o projeto (com Expo Go):**
+    ```bash
+    npx expo start --clear
+    ```
+    (Aí é só ler o QR Code com o Expo Go no celular).
