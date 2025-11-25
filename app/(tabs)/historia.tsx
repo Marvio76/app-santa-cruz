@@ -1,24 +1,99 @@
-import { useRouter } from 'expo-router';
 import React from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import {
+    StyleSheet,
+    Text,
+    View,
+    ScrollView,
+    Image,
+} from 'react-native';
 
 export default function Historia() {
-    const router = useRouter();
-
     return (
-        <View className="flex-1 bg-gray-50 justify-center items-center">
-            <Text className="text-3xl font-bold text-blue-900 mb-4">🏛️ História da Cidade</Text>
-            <Text className="text-gray-700 text-lg text-center px-8">
-                Aqui você pode contar um pouco sobre a origem e cultura de Santa Cruz.
-            </Text>
+        <ScrollView
+            style={styles.container}
+            contentContainerStyle={styles.contentContainer}
+        >
+            {/* Imagem de capa */}
+            <Image
+                source={require('../../assets/images/SantaCruz.jpg')}
+                style={styles.coverImage}
+                resizeMode="cover"
+            />
 
-            <TouchableOpacity
-                onPress={() => router.push('/(tabs)')}
-                className="mt-6 bg-blue-900 p-3 rounded-xl"
-            >
-                <Text className="text-white text-base">Voltar</Text>
-            </TouchableOpacity>
-        </View>
+            {/* Título */}
+            <Text style={styles.title}>História de Santa Cruz dos Milagres</Text>
+
+            {/* Conteúdo da história */}
+            <View style={styles.content}>
+                <Text style={styles.paragraph}>
+                    Santa Cruz dos Milagres é um município brasileiro localizado no estado do Piauí,
+                    com uma rica história que remonta aos primeiros colonizadores da região. A cidade
+                    foi fundada em meados do século XVIII, quando missionários e exploradores
+                    estabeleceram os primeiros povoados na área, atraídos pela fertilidade das terras
+                    e pela presença de recursos naturais abundantes.
+                </Text>
+
+                <Text style={styles.paragraph}>
+                    O nome "Santa Cruz dos Milagres" tem origem em uma lenda local que conta sobre
+                    uma cruz milagrosa encontrada pelos primeiros habitantes. Segundo a tradição
+                    oral, essa cruz teria aparecido misteriosamente em um local específico, e
+                    diversos milagres foram atribuídos a ela, atraindo peregrinos e devotos de
+                    toda a região. Esse evento marcou profundamente a identidade cultural e
+                    religiosa da comunidade.
+                </Text>
+
+                <Text style={styles.paragraph}>
+                    Ao longo dos séculos, a cidade desenvolveu-se como um importante centro
+                    comercial e agrícola do interior piauiense. A economia local sempre esteve
+                    baseada na agricultura familiar, na pecuária extensiva e no comércio de
+                    produtos regionais. A comunidade manteve suas tradições culturais,
+                    preservando festas religiosas, danças folclóricas e manifestações artísticas
+                    que são passadas de geração em geração.
+                </Text>
+
+                <Text style={styles.paragraph}>
+                    Hoje, Santa Cruz dos Milagres continua sendo um lugar de grande importância
+                    histórica e cultural para o Piauí. A cidade preserva suas raízes enquanto
+                    busca o desenvolvimento sustentável, mantendo o equilíbrio entre o progresso
+                    e a preservação de suas tradições. Os moradores orgulham-se de sua história
+                    e trabalham para manter viva a memória dos fundadores e das gerações que
+                    construíram essa comunidade ao longo dos anos.
+                </Text>
+            </View>
+        </ScrollView>
     );
 }
 
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#f3f4f6',
+    },
+    contentContainer: {
+        paddingBottom: 30,
+    },
+    coverImage: {
+        width: '100%',
+        height: 200,
+        backgroundColor: '#e5e7eb',
+    },
+    title: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        color: '#0027a6ff',
+        marginTop: 20,
+        marginHorizontal: 20,
+        marginBottom: 20,
+        textAlign: 'center',
+    },
+    content: {
+        paddingHorizontal: 20,
+    },
+    paragraph: {
+        fontSize: 16,
+        lineHeight: 24,
+        color: '#374151',
+        marginBottom: 20,
+        textAlign: 'justify',
+    },
+});

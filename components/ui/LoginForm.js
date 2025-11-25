@@ -69,7 +69,7 @@ export default function LoginForm({ onLogin }) {
 
 const styles = StyleSheet.create({
     container: { width: '90%', maxWidth: 400, padding: 20, backgroundColor: '#fff', borderRadius: 12, shadowColor: '#000', shadowOpacity: 0.1, shadowOffset: { width: 0, height: 5 }, shadowRadius: 10, elevation: 5 },
-    title: { fontSize: 28, fontWeight: '700', marginBottom: 8 },
+    title: { fontSize: 28, fontWeight: '700', color: '#0027a6ff', marginBottom: 8 },
     subtitle: { fontSize: 14, color: '#666', marginBottom: 20 },
     input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, paddingHorizontal: 14, paddingVertical: 10, marginBottom: 12 },
     inputError: { borderColor: '#f00' },

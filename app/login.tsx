@@ -2,6 +2,7 @@ import axios from 'axios';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
+  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -29,19 +30,19 @@ export default function LoginScreen() {
     }
 
     try {
-      
+
       const dadosParaApi = {
         email: credentials.email,
-        senha: credentials.password 
+        senha: credentials.password
       };
 
       // Manda o objeto corrigido
       const response = await axios.post(`${API_URL}/api/auth/login`, dadosParaApi);
-      
+
       console.log('API respondeu com sucesso:', response.data);
       const token = response.data.token;
       // TODO: Salvar o token (AsyncStorage)
-      router.replace('/telaInicial');
+      router.replace('/(tabs)');
 
     } catch (error: any) {
       console.error('Erro no login:', error.response?.data || error.message);
@@ -55,43 +56,110 @@ export default function LoginScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.header}>
-          <Text style={styles.welcomeTitle}>Bem vindo ao Guia Santa Cruz</Text>
-          <Text style={styles.welcomeSubtitle}>Faça login para continuar</Text>
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Cabeçalho de Boas-Vindas */}
+        <View style={styles.welcomeHeader}>
+          <Text style={styles.welcomeText}>Bem vindo</Text>
+          <Text style={styles.cityName}>Santa Cruz dos Milagres</Text>
         </View>
 
-        <LoginForm onLogin={handleLogin} />
+        {/* Imagem de Capa */}
+        <Image
+          source={require('../assets/images/SantaCruz.jpg')}
+          style={styles.coverImage}
+          resizeMode="cover"
+        />
 
-        {loginError ? (
-          <Text style={styles.errorText}>{loginError}</Text>
-        ) : null}
+        {/* Formulário de Login */}
+        <View style={styles.formContainer}>
+          <LoginForm onLogin={handleLogin} />
 
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>Não tem uma conta? </Text>
-          <TouchableOpacity onPress={() => router.push('/register')}>
-            <Text style={styles.registerText}>Cadastre-se</Text>
+          {loginError ? (
+            <Text style={styles.errorText}>{loginError}</Text>
+          ) : null}
+
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>Não tem uma conta? </Text>
+            <TouchableOpacity onPress={() => router.push('/register')}>
+              <Text style={styles.registerText}>Cadastre-se</Text>
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity style={styles.forgotPassword}>
+            <Text style={styles.forgotPasswordText}>Esqueceu sua senha?</Text>
           </TouchableOpacity>
         </View>
-
-        <TouchableOpacity style={styles.forgotPassword}>
-          <Text style={styles.forgotPasswordText}>Esqueceu sua senha?</Text>
-        </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f8f8faff' },
-  scrollContainer: { flexGrow: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
-  header: { alignItems: 'center', marginBottom: 40 },
-  welcomeTitle: { fontSize: 32, fontWeight: 'bold', color: '#0027a6ff', marginBottom: 8 },
-  welcomeSubtitle: { fontSize: 16, color: '#666' },
-  footer: { flexDirection: 'row', justifyContent: 'center', marginTop: 30, marginBottom: 20 },
-  footerText: { color: '#666', fontSize: 16 },
-  registerText: { color: '#0027a6ff', fontSize: 16, fontWeight: '600' },
-  forgotPassword: { alignItems: 'center' },
-  forgotPasswordText: { color: '#0027a6ff', fontSize: 16 },
-  errorText: { color: 'red', textAlign: 'center', marginTop: 15, marginBottom: 10, fontSize: 16, fontWeight: '600' },
+  container: {
+    flex: 1,
+    backgroundColor: '#fff'
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    paddingBottom: 30,
+  },
+  welcomeHeader: {
+    alignItems: 'center',
+    paddingTop: 40,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+  },
+  welcomeText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#0027a6ff',
+    marginBottom: 8,
+  },
+  cityName: {
+    fontSize: 32,
+    fontWeight: '900',
+    color: '#0027a6ff',
+  },
+  coverImage: {
+    width: '100%',
+    height: 200,
+    marginBottom: 30,
+  },
+  formContainer: {
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 30,
+    marginBottom: 20
+  },
+  footerText: {
+    color: '#666',
+    fontSize: 16
+  },
+  registerText: {
+    color: '#0027a6ff',
+    fontSize: 16,
+    fontWeight: '600'
+  },
+  forgotPassword: {
+    alignItems: 'center'
+  },
+  forgotPasswordText: {
+    color: '#0027a6ff',
+    fontSize: 16
+  },
+  errorText: {
+    color: 'red',
+    textAlign: 'center',
+    marginTop: 15,
+    marginBottom: 10,
+    fontSize: 16,
+    fontWeight: '600'
+  },
 });

@@ -11,9 +11,9 @@ import MapComponent from '../../components/MapComponent';
 export default function Index() {
     // <-- MEMÓRIA DO FILTRO: null = mostrar tudo
     const [filtroAtivo, setFiltroAtivo] = useState(null);
-    
+
     // <-- ESTADO DA BARRA DE BUSCA
-    const [textoBusca, setTextoBusca] = useState(''); 
+    const [textoBusca, setTextoBusca] = useState('');
 
     // 📍 Lista de pontos no mapa (JSON FAKE DO MARVIO)
     const pontos = [
@@ -110,25 +110,35 @@ export default function Index() {
         },
     ];
 
-    // <-- LÓGICA DO FILTRO: Roda só quando o filtroAtivo mudar
+    // <-- LÓGICA DO FILTRO: Roda só quando o filtroAtivo ou textoBusca mudar
     const pontosFiltrados = useMemo(() => {
-        if (!filtroAtivo) return pontos; // Se não tem filtro, mostra tudo
+        // 1. Comece com a lista completa de pontos
+        let resultado = pontos;
 
-        if (filtroAtivo === 'Academias') {
-            return pontos.filter(p => p.pinColor === 'purple');
+        // 2. Se filtroAtivo não for nulo, filtre os pontos pela pinColor
+        if (filtroAtivo) {
+            if (filtroAtivo === 'Academias') {
+                resultado = resultado.filter(p => p.pinColor === 'purple');
+            } else if (filtroAtivo === 'Hotéis e Pousadas') {
+                resultado = resultado.filter(p => p.pinColor === 'pink');
+            } else if (filtroAtivo === 'Pontos Turísticos') {
+                resultado = resultado.filter(p => p.pinColor === 'blue');
+            } else if (filtroAtivo === 'Restaurantes') {
+                resultado = resultado.filter(p => p.pinColor === 'orange' || p.pinColor === 'green');
+            }
         }
-        if (filtroAtivo === 'Hotéis e Pousadas') {
-            return pontos.filter(p => p.pinColor === 'pink');
+
+        // 3. Se textoBusca não estiver vazio, filtre o resultado anterior verificando se o ponto.title inclui o texto digitado (case insensitive)
+        if (textoBusca.trim() !== '') {
+            const textoBuscaLower = textoBusca.toLowerCase().trim();
+            resultado = resultado.filter(p =>
+                p.title.toLowerCase().includes(textoBuscaLower)
+            );
         }
-        if (filtroAtivo === 'Pontos Turísticos') {
-            return pontos.filter(p => p.pinColor === 'blue');
-        }
-        if (filtroAtivo === 'Restaurantes') {
-            return pontos.filter(p => p.pinColor === 'orange' || p.pinColor === 'green');
-        }
-        
-        return pontos; // Fallback: mostra tudo
-    }, [filtroAtivo]); // Tira o 'pontos' daqui, ele não muda
+
+        // 4. Retorne a lista filtrada pelos dois critérios
+        return resultado;
+    }, [filtroAtivo, textoBusca]); // Atualiza quando filtroAtivo ou textoBusca mudar
 
     // <-- FUNÇÃO DO CLIQUE: O que o botão faz
     const handleFiltroPress = (filtro) => {
@@ -144,7 +154,7 @@ export default function Index() {
             <View style={styles.mapContainer}>
                 {/* <-- O MAPA AGORA USA OS PONTOS FILTRADOS */}
                 <MapComponent pontos={pontosFiltrados} style={styles.map} />
-                
+
                 {/* <-- BARRA DE BUSCA FLUTUANTE */}
                 <TextInput
                     placeholder="Aonde você quer ir?"
@@ -153,39 +163,39 @@ export default function Index() {
                     onChangeText={setTextoBusca}
                     style={styles.searchBar}
                 />
-                
+
                 {/* <-- CONTAINER DOS BOTÕES COM A LÓGICA CORRIGIDA */}
                 <View style={styles.filterButtonsContainer}>
-                    
-                    <TouchableOpacity 
-                        style={[styles.filterButton, filtroAtivo === 'Academias' && styles.filterButtonActive]} 
+
+                    <TouchableOpacity
+                        style={[styles.filterButton, filtroAtivo === 'Academias' && styles.filterButtonActive]}
                         onPress={() => handleFiltroPress('Academias')}
                     >
                         <Text style={[styles.filterButtonText, filtroAtivo === 'Academias' && styles.filterButtonTextActive]}>
                             Academias
                         </Text>
                     </TouchableOpacity>
-                    
-                    <TouchableOpacity 
-                        style={[styles.filterButton, filtroAtivo === 'Restaurantes' && styles.filterButtonActive]} 
+
+                    <TouchableOpacity
+                        style={[styles.filterButton, filtroAtivo === 'Restaurantes' && styles.filterButtonActive]}
                         onPress={() => handleFiltroPress('Restaurantes')}
                     >
                         <Text style={[styles.filterButtonText, filtroAtivo === 'Restaurantes' && styles.filterButtonTextActive]}>
                             Restaurantes
                         </Text>
                     </TouchableOpacity>
-                    
-                    <TouchableOpacity 
-                        style={[styles.filterButton, filtroAtivo === 'Pontos Turísticos' && styles.filterButtonActive]} 
+
+                    <TouchableOpacity
+                        style={[styles.filterButton, filtroAtivo === 'Pontos Turísticos' && styles.filterButtonActive]}
                         onPress={() => handleFiltroPress('Pontos Turísticos')}
                     >
                         <Text style={[styles.filterButtonText, filtroAtivo === 'Pontos Turísticos' && styles.filterButtonTextActive]}>
                             Pontos Turísticos
                         </Text>
                     </TouchableOpacity>
-                    
-                    <TouchableOpacity 
-                        style={[styles.filterButton, filtroAtivo === 'Hotéis e Pousadas' && styles.filterButtonActive]} 
+
+                    <TouchableOpacity
+                        style={[styles.filterButton, filtroAtivo === 'Hotéis e Pousadas' && styles.filterButtonActive]}
                         onPress={() => handleFiltroPress('Hotéis e Pousadas')}
                     >
                         <Text style={[styles.filterButtonText, filtroAtivo === 'Hotéis e Pousadas' && styles.filterButtonTextActive]}>
@@ -250,8 +260,8 @@ const styles = StyleSheet.create({
     },
     // <-- ESTILO DO BOTÃO ATIVO (FUNDO BRANCO)
     filterButtonActive: {
-        backgroundColor: '#fff', 
-        borderColor: '#0027a6ff', 
+        backgroundColor: '#fff',
+        borderColor: '#0027a6ff',
     },
     filterButtonText: {
         color: '#fff', // TEXTO PADRÃO BRANCO
@@ -259,7 +269,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
     },
     // <-- ESTILO DO TEXTO ATIVO (TEXTO AZUL)
-    filterButtonTextActive: { 
-        color: '#0027a6ff', 
+    filterButtonTextActive: {
+        color: '#0027a6ff',
     },
 });
