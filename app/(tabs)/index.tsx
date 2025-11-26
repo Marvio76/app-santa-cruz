@@ -16,30 +16,30 @@ export default function Index() {
     const [textoBusca, setTextoBusca] = useState('');
 
     // 📍 Lista de pontos no mapa (JSON FAKE DO MARVIO)
-    const pontos = [
+   const pontos = [
         {
-            title: 'Comercio_01',
+            title: 'Comercio Fernandes',
             description: 'Um comércio local conhecido pelo bom atendimento e variedade de produtos da região.',
             latitude: -5.80722,
             longitude: -41.95426,
             pinColor: 'orange', // <-- Vamo usar isso
         },
         {
-            title: 'Comercio-Frutaria_02',
+            title: 'Comercio Santa Cruz',
             description: 'Frutaria com frutas sempre frescas e selecionadas, direto dos produtores locais.',
             latitude: -5.80395,
             longitude: -41.95365,
             pinColor: 'green', // <-- Vamo usar isso
         },
         {
-            title: 'Comercio-Frutaria_03',
+            title: 'Comercio olho d\'agua',
             description: 'Espaço agradável com grande variedade de frutas, verduras e produtos naturais.',
             latitude: -5.79952,
             longitude: -41.95657,
             pinColor: 'green',
         },
         {
-            title: 'Comercio-Frutaria_04',
+            title: 'Comercio Azevedo',
             description: 'Frutaria bem localizada, com excelente qualidade e preços acessíveis.',
             latitude: -5.80339,
             longitude: -41.96101,
@@ -53,21 +53,21 @@ export default function Index() {
             pinColor: 'blue', // <-- Vamo usar isso (Ponto Turístico)
         },
         {
-            title: 'Comercio_05',
+            title: 'Comercio Central',
             description: 'Loja tradicional com produtos variados e ótimo atendimento aos moradores locais.',
             latitude: -5.80292,
             longitude: -41.9615,
             pinColor: 'orange',
         },
         {
-            title: 'Comercio-Frutaria_06',
+            title: 'Comercio Sao Jose',
             description: 'Frutaria familiar com atendimento simpático e produtos de excelente qualidade.',
             latitude: -5.80067,
             longitude: -41.95818,
             pinColor: 'green',
         },
         {
-            title: 'Comercio-Frutaria_07',
+            title: 'Comercio Chico julia',
             description: 'Local acolhedor com frutas fresquinhas e ambiente limpo e organizado.',
             latitude: -5.80315,
             longitude: -41.95365,
@@ -81,28 +81,28 @@ export default function Index() {
             pinColor: 'orange',
         },
         {
-            title: 'Academia',
+            title: 'Academia FitLife',
             description: 'Academia moderna e bem equipada, ideal para quem busca saúde e bem-estar.',
             latitude: -5.79944,
             longitude: -41.95658,
             pinColor: 'purple', // <-- Vamo usar isso
         },
         {
-            title: 'Cemiterio-Central_01',
+            title: 'Cemiterio Zé omano',
             description: 'Cemitério central da cidade, bem cuidado e com estrutura organizada para visitas.',
             latitude: -5.80097,
             longitude: -41.95791,
             pinColor: 'gray',
         },
         {
-            title: 'Lava-jato',
+            title: 'Lava-jato Gustavo',
             description: 'Lava-jato com excelente reputação, oferecendo limpeza completa e detalhada.',
             latitude: -5.80701,
             longitude: -41.96138,
             pinColor: 'cyan',
         },
         {
-            title: 'Pousada',
+            title: 'Pousada Ailton',
             description: 'Pousada acolhedora com ótimo conforto e atendimento, ideal para visitantes da cidade.',
             latitude: -5.81472,
             longitude: -41.95459,
