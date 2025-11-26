@@ -1,6 +1,7 @@
+import { useRouter } from 'expo-router';
 import React from 'react';
 import MapView, { Marker } from 'react-native-maps';
-import { Alert, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 interface Ponto {
     title: string;
@@ -16,6 +17,8 @@ interface MapComponentProps {
 }
 
 export default function MapComponent({ pontos, style }: MapComponentProps) {
+    const router = useRouter();
+
     return (
         <MapView
             style={[styles.map, style]}
@@ -37,7 +40,14 @@ export default function MapComponent({ pontos, style }: MapComponentProps) {
                     description={ponto.description}
                     pinColor={ponto.pinColor || 'red'}
                     onPress={() => {
-                        Alert.alert(ponto.title, ponto.description);
+                        router.push({
+                            pathname: `/local/${index}`,
+                            params: {
+                                ...ponto,
+                                latitude: ponto.latitude.toString(),
+                                longitude: ponto.longitude.toString(),
+                            },
+                        });
                     }}
                 />
             ))}
