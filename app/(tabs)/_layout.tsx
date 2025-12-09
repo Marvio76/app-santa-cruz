@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Tabs, useRouter } from 'expo-router';
+import { Tabs } from 'expo-router';
 
 import { FontAwesome } from '@expo/vector-icons'; // (Vamos usar ícones do FontAwesome)
 
@@ -10,7 +10,6 @@ function TabBarIcon(props: { name: React.ComponentProps<typeof FontAwesome>['nam
 }
 
 export default function TabLayout() {
-  const router = useRouter();
 
   return (
     <Tabs
@@ -27,7 +26,7 @@ export default function TabLayout() {
           fontWeight: 'bold',
         },
       }}>
-      
+
       {/* Tab 1: O MAPA (index.tsx) */}
       <Tabs.Screen
         name="index" // <-- O mapa que a gente arrumou
@@ -46,20 +45,12 @@ export default function TabLayout() {
         }}
       />
 
-      {/* Tab 3: PERFIL (O "Login") - Ícone de Pessoa */}
+      {/* Tab 3: PERFIL - Ícone de Pessoa */}
       <Tabs.Screen
-        name="perfil" // (arquivo 'fantasma', não precisa criar)
+        name="perfil"
         options={{
           title: 'Perfil',
           tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
-        }}
-        listeners={{
-          tabPress: (e) => {
-            // Impede o app de tentar navegar pra uma tela "perfil"
-            e.preventDefault();
-            // Manda o usuário pra tela de login
-            router.push('/login'); 
-          },
         }}
       />
 

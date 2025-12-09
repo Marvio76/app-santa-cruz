@@ -1,19 +1,28 @@
 import React, { useState, useMemo } from 'react';
 import {
+    FlatList,
+    Image,
+    ScrollView,
     StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
     View,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import MapComponent from '../../components/MapComponent';
 
 export default function Index() {
+    const router = useRouter();
+
     // <-- MEMÓRIA DO FILTRO: null = mostrar tudo
     const [filtroAtivo, setFiltroAtivo] = useState(null);
 
     // <-- ESTADO DA BARRA DE BUSCA
     const [textoBusca, setTextoBusca] = useState('');
+
+    // <-- ESTADO DA VISUALIZAÇÃO: false = mapa, true = lista
+    const [visualizacaoLista, setVisualizacaoLista] = useState(false);
 
     // 📍 Lista de pontos no mapa (JSON FAKE DO MARVIO)
    const pontos = [
@@ -23,6 +32,7 @@ export default function Index() {
             latitude: -5.80722,
             longitude: -41.95426,
             pinColor: 'orange', // <-- Vamo usar isso
+            image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80', // Restaurantes/Comércio de comida
         },
         {
             title: 'Comercio Santa Cruz',
@@ -30,6 +40,7 @@ export default function Index() {
             latitude: -5.80395,
             longitude: -41.95365,
             pinColor: 'green', // <-- Vamo usar isso
+            image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80', // Restaurantes/Comércio de comida
         },
         {
             title: 'Comercio olho d\'agua',
@@ -37,6 +48,7 @@ export default function Index() {
             latitude: -5.79952,
             longitude: -41.95657,
             pinColor: 'green',
+            image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80', // Restaurantes/Comércio de comida
         },
         {
             title: 'Comercio Azevedo',
@@ -44,6 +56,7 @@ export default function Index() {
             latitude: -5.80339,
             longitude: -41.96101,
             pinColor: 'green',
+            image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80', // Restaurantes/Comércio de comida
         },
         {
             title: 'Olho a Agua',
@@ -51,6 +64,7 @@ export default function Index() {
             latitude: -5.79965,
             longitude: -41.95587,
             pinColor: 'blue', // <-- Vamo usar isso (Ponto Turístico)
+            image: 'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?auto=format&fit=crop&w=800&q=80', // Natureza/Olho d'água
         },
         {
             title: 'Comercio Central',
@@ -58,6 +72,7 @@ export default function Index() {
             latitude: -5.80292,
             longitude: -41.9615,
             pinColor: 'orange',
+            image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80', // Restaurantes/Comércio de comida
         },
         {
             title: 'Comercio Sao Jose',
@@ -65,6 +80,7 @@ export default function Index() {
             latitude: -5.80067,
             longitude: -41.95818,
             pinColor: 'green',
+            image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80', // Restaurantes/Comércio de comida
         },
         {
             title: 'Comercio Chico julia',
@@ -72,13 +88,15 @@ export default function Index() {
             latitude: -5.80315,
             longitude: -41.95365,
             pinColor: 'green',
+            image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80', // Restaurantes/Comércio de comida
         },
         {
-            title: 'Comercio_08',
+            title: 'Comercio Ze Omano',
             description: 'Comércio com boa reputação, variedade de produtos e preços justos.',
             latitude: -5.80355,
             longitude: -41.95297,
             pinColor: 'orange',
+            image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80', // Restaurantes/Comércio de comida
         },
         {
             title: 'Academia FitLife',
@@ -86,13 +104,7 @@ export default function Index() {
             latitude: -5.79944,
             longitude: -41.95658,
             pinColor: 'purple', // <-- Vamo usar isso
-        },
-        {
-            title: 'Cemiterio Zé omano',
-            description: 'Cemitério central da cidade, bem cuidado e com estrutura organizada para visitas.',
-            latitude: -5.80097,
-            longitude: -41.95791,
-            pinColor: 'gray',
+            image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=800&q=80', // Academias
         },
         {
             title: 'Lava-jato Gustavo',
@@ -100,6 +112,7 @@ export default function Index() {
             latitude: -5.80701,
             longitude: -41.96138,
             pinColor: 'cyan',
+            image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80', // Comércio genérico
         },
         {
             title: 'Pousada Ailton',
@@ -107,6 +120,7 @@ export default function Index() {
             latitude: -5.81472,
             longitude: -41.95459,
             pinColor: 'pink', // <-- Vamo usar isso
+            image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80', // Hotéis/Pousadas
         },
     ];
 
@@ -149,61 +163,221 @@ export default function Index() {
         }
     };
 
+    // <-- FUNÇÃO PARA RENDERIZAR CADA ITEM DA LISTA
+    const renderListItem = ({ item, index }) => {
+        // Encontra o índice do item na lista original de pontos
+        const originalIndex = pontos.findIndex(
+            p => p.title === item.title &&
+                 p.latitude === item.latitude &&
+                 p.longitude === item.longitude
+        );
+        const itemIndex = originalIndex !== -1 ? originalIndex : index;
+
+        return (
+            <TouchableOpacity
+                style={styles.listCard}
+                onPress={() => {
+                    router.push({
+                        pathname: `/local/${itemIndex}` as any,
+                        params: {
+                            ...item,
+                            latitude: item.latitude.toString(),
+                            longitude: item.longitude.toString(),
+                        },
+                    });
+                }}
+            >
+                <Image
+                    source={
+                        item.image
+                            ? { uri: item.image }
+                            : require('../../assets/images/MercadoChicoJulia.jpg')
+                    }
+                    style={styles.listCardImage}
+                    resizeMode="cover"
+                />
+                <View style={styles.listCardContent}>
+                    <Text style={styles.listCardTitle}>{item.title}</Text>
+                    <Text style={styles.listCardDescription} numberOfLines={2}>
+                        {item.description}
+                    </Text>
+                </View>
+            </TouchableOpacity>
+        );
+    };
+
     return (
         <View style={styles.mainContent}>
-            <View style={styles.mapContainer}>
-                {/* <-- O MAPA AGORA USA OS PONTOS FILTRADOS */}
-                <MapComponent pontos={pontosFiltrados} style={styles.map} />
+            {visualizacaoLista ? (
+                // <-- VISUALIZAÇÃO EM LISTA
+                <View style={styles.listContainer}>
+                    {/* <-- BARRA DE BUSCA */}
+                    <TextInput
+                        placeholder="Aonde você quer ir?"
+                        placeholderTextColor="#888"
+                        value={textoBusca}
+                        onChangeText={setTextoBusca}
+                        style={styles.searchBarList}
+                    />
 
-                {/* <-- BARRA DE BUSCA FLUTUANTE */}
-                <TextInput
-                    placeholder="Aonde você quer ir?"
-                    placeholderTextColor="#888"
-                    value={textoBusca}
-                    onChangeText={setTextoBusca}
-                    style={styles.searchBar}
-                />
+                    {/* <-- FLATLIST COM OS PONTOS FILTRADOS */}
+                    <FlatList
+                        data={pontosFiltrados}
+                        renderItem={renderListItem}
+                        keyExtractor={(item, index) => index.toString()}
+                        contentContainerStyle={styles.listContent}
+                        showsVerticalScrollIndicator={false}
+                        ListHeaderComponent={
+                            <ScrollView
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                style={styles.chipsContainer}
+                                contentContainerStyle={styles.chipsContent}
+                            >
+                                <TouchableOpacity
+                                    style={[
+                                        styles.chip,
+                                        filtroAtivo === 'Academias' && styles.chipActive
+                                    ]}
+                                    onPress={() => handleFiltroPress('Academias')}
+                                >
+                                    <Text
+                                        style={[
+                                            styles.chipText,
+                                            filtroAtivo === 'Academias' && styles.chipTextActive
+                                        ]}
+                                    >
+                                        Academias
+                                    </Text>
+                                </TouchableOpacity>
 
-                {/* <-- CONTAINER DOS BOTÕES COM A LÓGICA CORRIGIDA */}
-                <View style={styles.filterButtonsContainer}>
+                                <TouchableOpacity
+                                    style={[
+                                        styles.chip,
+                                        filtroAtivo === 'Restaurantes' && styles.chipActive
+                                    ]}
+                                    onPress={() => handleFiltroPress('Restaurantes')}
+                                >
+                                    <Text
+                                        style={[
+                                            styles.chipText,
+                                            filtroAtivo === 'Restaurantes' && styles.chipTextActive
+                                        ]}
+                                    >
+                                        Restaurantes
+                                    </Text>
+                                </TouchableOpacity>
 
+                                <TouchableOpacity
+                                    style={[
+                                        styles.chip,
+                                        filtroAtivo === 'Pontos Turísticos' && styles.chipActive
+                                    ]}
+                                    onPress={() => handleFiltroPress('Pontos Turísticos')}
+                                >
+                                    <Text
+                                        style={[
+                                            styles.chipText,
+                                            filtroAtivo === 'Pontos Turísticos' && styles.chipTextActive
+                                        ]}
+                                    >
+                                        Pontos Turísticos
+                                    </Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    style={[
+                                        styles.chip,
+                                        filtroAtivo === 'Hotéis e Pousadas' && styles.chipActive
+                                    ]}
+                                    onPress={() => handleFiltroPress('Hotéis e Pousadas')}
+                                >
+                                    <Text
+                                        style={[
+                                            styles.chipText,
+                                            filtroAtivo === 'Hotéis e Pousadas' && styles.chipTextActive
+                                        ]}
+                                    >
+                                        Hotéis e Pousadas
+                                    </Text>
+                                </TouchableOpacity>
+                            </ScrollView>
+                        }
+                    />
+
+                    {/* <-- BOTÃO PARA VOLTAR AO MAPA */}
                     <TouchableOpacity
-                        style={[styles.filterButton, filtroAtivo === 'Academias' && styles.filterButtonActive]}
-                        onPress={() => handleFiltroPress('Academias')}
+                        style={styles.toggleButton}
+                        onPress={() => setVisualizacaoLista(false)}
                     >
-                        <Text style={[styles.filterButtonText, filtroAtivo === 'Academias' && styles.filterButtonTextActive]}>
-                            Academias
-                        </Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={[styles.filterButton, filtroAtivo === 'Restaurantes' && styles.filterButtonActive]}
-                        onPress={() => handleFiltroPress('Restaurantes')}
-                    >
-                        <Text style={[styles.filterButtonText, filtroAtivo === 'Restaurantes' && styles.filterButtonTextActive]}>
-                            Restaurantes
-                        </Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={[styles.filterButton, filtroAtivo === 'Pontos Turísticos' && styles.filterButtonActive]}
-                        onPress={() => handleFiltroPress('Pontos Turísticos')}
-                    >
-                        <Text style={[styles.filterButtonText, filtroAtivo === 'Pontos Turísticos' && styles.filterButtonTextActive]}>
-                            Pontos Turísticos
-                        </Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={[styles.filterButton, filtroAtivo === 'Hotéis e Pousadas' && styles.filterButtonActive]}
-                        onPress={() => handleFiltroPress('Hotéis e Pousadas')}
-                    >
-                        <Text style={[styles.filterButtonText, filtroAtivo === 'Hotéis e Pousadas' && styles.filterButtonTextActive]}>
-                            Hotéis e Pousadas
-                        </Text>
+                        <Text style={styles.toggleButtonText}>Ver Mapa 🗺️</Text>
                     </TouchableOpacity>
                 </View>
-            </View>
+            ) : (
+                // <-- VISUALIZAÇÃO NO MAPA
+                <View style={styles.mapContainer}>
+                    {/* <-- O MAPA AGORA USA OS PONTOS FILTRADOS */}
+                    <MapComponent pontos={pontosFiltrados} style={styles.map} />
+
+                    {/* <-- BARRA DE BUSCA FLUTUANTE */}
+                    <TextInput
+                        placeholder="Aonde você quer ir?"
+                        placeholderTextColor="#888"
+                        value={textoBusca}
+                        onChangeText={setTextoBusca}
+                        style={styles.searchBar}
+                    />
+
+                    {/* <-- BOTÃO PARA VER LISTA */}
+                    <TouchableOpacity
+                        style={styles.toggleButton}
+                        onPress={() => setVisualizacaoLista(true)}
+                    >
+                        <Text style={styles.toggleButtonText}>Ver Lista 📄</Text>
+                    </TouchableOpacity>
+
+                    {/* <-- CONTAINER DOS BOTÕES COM A LÓGICA CORRIGIDA - SÓ NO MODO MAPA */}
+                    {!visualizacaoLista && (
+                        <View style={styles.filterButtonsContainer}>
+                            <TouchableOpacity
+                                style={[styles.filterButton, filtroAtivo === 'Academias' && styles.filterButtonActive]}
+                                onPress={() => handleFiltroPress('Academias')}
+                            >
+                                <Text style={[styles.filterButtonText, filtroAtivo === 'Academias' && styles.filterButtonTextActive]}>
+                                    Academias
+                                </Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={[styles.filterButton, filtroAtivo === 'Restaurantes' && styles.filterButtonActive]}
+                                onPress={() => handleFiltroPress('Restaurantes')}
+                            >
+                                <Text style={[styles.filterButtonText, filtroAtivo === 'Restaurantes' && styles.filterButtonTextActive]}>
+                                    Restaurantes
+                                </Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={[styles.filterButton, filtroAtivo === 'Pontos Turísticos' && styles.filterButtonActive]}
+                                onPress={() => handleFiltroPress('Pontos Turísticos')}
+                            >
+                                <Text style={[styles.filterButtonText, filtroAtivo === 'Pontos Turísticos' && styles.filterButtonTextActive]}>
+                                    Pontos Turísticos
+                                </Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={[styles.filterButton, filtroAtivo === 'Hotéis e Pousadas' && styles.filterButtonActive]}
+                                onPress={() => handleFiltroPress('Hotéis e Pousadas')}
+                            >
+                                <Text style={[styles.filterButtonText, filtroAtivo === 'Hotéis e Pousadas' && styles.filterButtonTextActive]}>
+                                    Hotéis e Pousadas
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                </View>
+            )}
         </View>
     );
 }
@@ -271,5 +445,107 @@ const styles = StyleSheet.create({
     // <-- ESTILO DO TEXTO ATIVO (TEXTO AZUL)
     filterButtonTextActive: {
         color: '#0027a6ff',
+    },
+    // <-- ESTILOS DA LISTA
+    listContainer: {
+        flex: 1,
+        backgroundColor: '#f3f4f6',
+    },
+    searchBarList: {
+        marginTop: 60,
+        marginHorizontal: 20,
+        marginBottom: 10,
+        backgroundColor: '#fff',
+        paddingHorizontal: 15,
+        paddingVertical: 10,
+        borderRadius: 10,
+        elevation: 5,
+        fontSize: 16,
+        color: '#000',
+    },
+    listContent: {
+        padding: 20,
+        paddingTop: 10, // Menos espaço no topo porque os chips já têm margin
+        paddingBottom: 100, // Espaço para o botão de alternância
+    },
+    listCard: {
+        flexDirection: 'row',
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        marginBottom: 15,
+        padding: 12,
+        elevation: 3,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+    },
+    listCardImage: {
+        width: 80,
+        height: 80,
+        borderRadius: 8,
+        marginRight: 12,
+    },
+    listCardContent: {
+        flex: 1,
+        justifyContent: 'center',
+    },
+    listCardTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#0027a6ff',
+        marginBottom: 6,
+    },
+    listCardDescription: {
+        fontSize: 14,
+        color: '#666',
+        lineHeight: 20,
+    },
+    // <-- BOTÃO DE ALTERNÂNCIA
+    toggleButton: {
+        position: 'absolute',
+        top: 60,
+        right: 20,
+        zIndex: 10,
+        backgroundColor: '#0027a6ff',
+        paddingHorizontal: 20,
+        paddingVertical: 12,
+        borderRadius: 10,
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+    },
+    toggleButtonText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 14,
+    },
+    // <-- ESTILOS DOS CHIPS (FILTROS HORIZONTAIS NO MODO LISTA)
+    chipsContainer: {
+        marginBottom: 15,
+    },
+    chipsContent: {
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+    },
+    chip: {
+        backgroundColor: '#e0e0e0',
+        paddingHorizontal: 15,
+        paddingVertical: 8,
+        borderRadius: 20,
+        marginRight: 10,
+    },
+    chipActive: {
+        backgroundColor: '#0027a6ff',
+    },
+    chipText: {
+        color: '#000',
+        fontWeight: '600',
+        fontSize: 14,
+    },
+    chipTextActive: {
+        color: '#fff',
     },
 });

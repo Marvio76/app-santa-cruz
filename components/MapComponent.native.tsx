@@ -9,6 +9,7 @@ interface Ponto {
     latitude: number;
     longitude: number;
     pinColor?: string;
+    image?: string;
 }
 
 interface MapComponentProps {

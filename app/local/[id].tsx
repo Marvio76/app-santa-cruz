@@ -26,6 +26,7 @@ export default function LocalDetalhesScreen() {
     latitude?: string;
     longitude?: string;
     pinColor?: string;
+    image?: string;
   }>();
 
   // Converte os parâmetros para o tipo Ponto
@@ -44,7 +45,11 @@ export default function LocalDetalhesScreen() {
     <View style={styles.container}>
       {/* Imagem de Destaque */}
       <Image
-        source={{ uri: 'https://source.unsplash.com/random/?hotel' }}
+        source={
+          params.image
+            ? { uri: params.image }
+            : require('../../assets/images/MercadoChicoJulia.jpg')
+        }
         style={styles.coverImage}
         resizeMode="cover"
       />
