@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import {
     ScrollView,
     StyleSheet,
@@ -6,19 +6,48 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function PerfilScreen() {
     const router = useRouter();
 
-    // TODO: Buscar dados do usuário logado (contexto, async storage, etc.)
-    const nomeUsuario = 'Felype Max';
-    const emailUsuario = 'felype@example.com';
+    // Estados de usuário
+    const [nome, setNome] = useState<string>('Carregando...');
+    const [email, setEmail] = useState<string>('');
 
-    const handleSair = () => {
-        // TODO: Implementar lógica de logout
-        console.log('Logout');
+    // Carregar usuário do AsyncStorage ao focar na tela
+    const carregarUsuario = useCallback(async () => {
+        try {
+            const dado = await AsyncStorage.getItem('usuario');
+            if (dado) {
+                const user = JSON.parse(dado);
+                setNome(user?.nome || user?.name || 'Usuário');
+                setEmail(user?.email || '');
+            } else {
+                setNome('Usuário Visitante');
+                setEmail('');
+                // Opcional: redirecionar para login
+                // router.replace('/');
+            }
+        } catch (e) {
+            setNome('Usuário Visitante');
+            setEmail('');
+        }
+    }, []);
+
+    useFocusEffect(
+        useCallback(() => {
+            carregarUsuario();
+        }, [carregarUsuario])
+    );
+
+    const handleSair = async () => {
+        try {
+            await AsyncStorage.multiRemove(['token', 'usuario']);
+        } catch {}
+        router.replace('/');
     };
 
     const handleMeusLocais = () => {
@@ -42,8 +71,8 @@ export default function PerfilScreen() {
                 <View style={styles.avatarContainer}>
                     <FontAwesome name="user-circle" size={100} color="#0027a6ff" />
                 </View>
-                <Text style={styles.nomeUsuario}>{nomeUsuario}</Text>
-                <Text style={styles.emailUsuario}>{emailUsuario}</Text>
+                <Text style={styles.nomeUsuario}>{nome}</Text>
+                <Text style={styles.emailUsuario}>{email}</Text>
             </View>
 
             {/* Ações: Lista de Botões */}

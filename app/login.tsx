@@ -12,6 +12,7 @@ import {
   View
 } from 'react-native';
 import LoginForm from '../components/ui/LoginForm';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const API_URL = 'https://guia-santa-cruz-api.onrender.com';
 
@@ -40,8 +41,13 @@ export default function LoginScreen() {
       const response = await axios.post(`${API_URL}/api/auth/login`, dadosParaApi);
 
       console.log('API respondeu com sucesso:', response.data);
-      const token = response.data.token;
-      // TODO: Salvar o token (AsyncStorage)
+      // Persistir token e usuário no dispositivo
+      if (response?.data?.token) {
+        await AsyncStorage.setItem('token', response.data.token);
+      }
+      if (response?.data?.usuario) {
+        await AsyncStorage.setItem('usuario', JSON.stringify(response.data.usuario));
+      }
       router.replace('/(tabs)');
 
     } catch (error: any) {

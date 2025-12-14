@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
     FlatList,
     Image,
@@ -9,8 +9,9 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import MapComponent from '../../components/MapComponent';
+import axios from 'axios';
 
 export default function Index() {
     const router = useRouter();
@@ -25,7 +26,7 @@ export default function Index() {
     const [visualizacaoLista, setVisualizacaoLista] = useState(false);
 
     // 📍 Lista de pontos no mapa (JSON FAKE DO MARVIO)
-   const pontos = [
+   const PONTOS_ESTATICOS = [
         {
             title: 'Comercio Fernandes',
             description: 'Um comércio local conhecido pelo bom atendimento e variedade de produtos da região.',
@@ -124,10 +125,57 @@ export default function Index() {
         },
     ];
 
+    // Estado que conterá estáticos + API
+    const [locais, setLocais] = useState(PONTOS_ESTATICOS);
+
+    // Buscar locais da API e combinar
+    const fetchLocais = useCallback(async () => {
+        try {
+            const response = await axios.get('https://guia-santa-cruz-api.onrender.com/api/locais');
+            const apiData = Array.isArray(response.data) ? response.data : [];
+            // Padroniza campos vindos da API para o formato dos pontos estáticos
+            const normalizados = apiData
+                .map((item) => {
+                    // Campos possíveis: nome/sobre/latitude/longitude/foto/image
+                    const title = item.title || item.nome || '';
+                    const description = item.description || item.sobre || '';
+                    const latitude = typeof item.latitude === 'number' ? item.latitude : parseFloat(String(item.latitude));
+                    const longitude = typeof item.longitude === 'number' ? item.longitude : parseFloat(String(item.longitude));
+                    const foto = item.foto || undefined;
+                    const image = item.image || item.imagem || foto || undefined;
+                    if (!title || Number.isNaN(latitude) || Number.isNaN(longitude)) return null;
+                    return {
+                        title,
+                        description,
+                        latitude,
+                        longitude,
+                        foto,
+                        image: image || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80',
+                        // pinColor default, sem categorização vinda da API
+                        pinColor: 'orange',
+                    };
+                })
+                .filter(Boolean);
+
+            const listaCombinada = [...PONTOS_ESTATICOS, ...normalizados];
+            setLocais(listaCombinada);
+        } catch (e) {
+            // Em caso de erro, mantém os estáticos
+            setLocais(PONTOS_ESTATICOS);
+        }
+    }, []);
+
+    // Chama quando a tela ganha foco
+    useFocusEffect(
+        useCallback(() => {
+            fetchLocais();
+        }, [fetchLocais])
+    );
+
     // <-- LÓGICA DO FILTRO: Roda só quando o filtroAtivo ou textoBusca mudar
     const pontosFiltrados = useMemo(() => {
         // 1. Comece com a lista completa de pontos
-        let resultado = pontos;
+        let resultado = locais;
 
         // 2. Se filtroAtivo não for nulo, filtre os pontos pela pinColor
         if (filtroAtivo) {
@@ -152,7 +200,7 @@ export default function Index() {
 
         // 4. Retorne a lista filtrada pelos dois critérios
         return resultado;
-    }, [filtroAtivo, textoBusca]); // Atualiza quando filtroAtivo ou textoBusca mudar
+    }, [filtroAtivo, textoBusca, locais]); // Atualiza quando filtroAtivo, textoBusca ou locais mudar
 
     // <-- FUNÇÃO DO CLIQUE: O que o botão faz
     const handleFiltroPress = (filtro) => {
@@ -166,7 +214,7 @@ export default function Index() {
     // <-- FUNÇÃO PARA RENDERIZAR CADA ITEM DA LISTA
     const renderListItem = ({ item, index }) => {
         // Encontra o índice do item na lista original de pontos
-        const originalIndex = pontos.findIndex(
+        const originalIndex = locais.findIndex(
             p => p.title === item.title &&
                  p.latitude === item.latitude &&
                  p.longitude === item.longitude
@@ -188,11 +236,14 @@ export default function Index() {
                 }}
             >
                 <Image
-                    source={
-                        item.image
-                            ? { uri: item.image }
-                            : require('../../assets/images/MercadoChicoJulia.jpg')
-                    }
+                    source={{
+                        uri:
+                            (item.foto && typeof item.foto === 'string' && item.foto.trim().length > 0)
+                                ? item.foto
+                                : ((item.image && typeof item.image === 'string' && item.image.trim().length > 0)
+                                    ? item.image
+                                    : 'https://via.placeholder.com/300x200.png?text=Imagem+indisponivel')
+                    }}
                     style={styles.listCardImage}
                     resizeMode="cover"
                 />
