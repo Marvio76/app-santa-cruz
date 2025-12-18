@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 
 interface Ponto {
   title: string;
@@ -43,59 +43,60 @@ export default function LocalDetalhesScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Imagem de Destaque */}
-      <Image
-        source={
-          params.image
-            ? { uri: params.image }
-            : require('../../assets/images/MercadoChicoJulia.jpg')
-        }
-        style={styles.coverImage}
-        resizeMode="cover"
-      />
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* Hero Image Section */}
+        <View style={styles.heroSection}>
+          <Image
+            source={
+              params.image
+                ? { uri: params.image }
+                : require('../../assets/images/MercadoChicoJulia.jpg')
+            }
+            style={styles.heroImage}
+            resizeMode="cover"
+          />
 
-      {/* Botão Voltar */}
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => router.back()}
-      >
-        <Ionicons name="arrow-back" size={24} color="#0027a6ff" />
-      </TouchableOpacity>
-
-      {/* Conteúdo Scrollável */}
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Título do Local */}
-        <Text style={styles.titulo}>{local.title}</Text>
-
-        {/* Endereço */}
-        <View style={styles.enderecoContainer}>
-          <Ionicons name="location-outline" size={20} color="#666" />
-          <Text style={styles.endereco}>{endereco}</Text>
+          {/* Floating Back Button */}
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={styles.backButton}
+            activeOpacity={0.8}
+            accessibilityLabel="Voltar"
+          >
+            <Ionicons name="chevron-back" size={28} color="#fff" />
+          </TouchableOpacity>
         </View>
 
-        {/* Seção: Sobre o local */}
-        <View style={styles.secao}>
-          <Text style={styles.secaoTitulo}>Sobre o local</Text>
-          <Text style={styles.descricao}>{local.description}</Text>
-        </View>
-
-        {/* Seção: Avaliações */}
-        <View style={styles.secao}>
-          <Text style={styles.secaoTitulo}>Avaliações</Text>
-          <View style={styles.avaliacoesContainer}>
-            <Text style={styles.estrelas}>⭐⭐⭐⭐⭐</Text>
-            <Text style={styles.avaliacaoTexto}>
-              (Avaliações em breve)
+        {/* Content Panel with Modern Design */}
+        <View style={styles.contentPanel}>
+          {/* Title Section */}
+          <View style={styles.titleSection}>
+            <Text style={styles.title} numberOfLines={3}>
+              {local.title}
             </Text>
           </View>
-        </View>
 
-        {/* Espaço extra no final */}
-        <View style={styles.espacoFinal} />
+          {/* Address Info */}
+          <View style={styles.addressRow}>
+            <Ionicons name="location-sharp" size={18} color="#0027a6ff" />
+            <Text style={styles.addressText}>{endereco}</Text>
+          </View>
+
+          {/* About Section */}
+          <View style={styles.aboutSection}>
+            <Text style={styles.sectionTitle}>Sobre o local</Text>
+            <Text style={styles.description}>{local.description}</Text>
+          </View>
+
+          {/* Ratings Section */}
+          <View style={styles.ratingsSection}>
+            <Text style={styles.sectionTitle}>Avaliações</Text>
+            <View style={styles.ratingsContainer}>
+              <Text style={styles.stars}>⭐⭐⭐⭐⭐</Text>
+              <Text style={styles.ratingsText}>(Avaliações em breve)</Text>
+            </View>
+          </View>
+        </View>
       </ScrollView>
     </View>
   );
@@ -104,85 +105,107 @@ export default function LocalDetalhesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f9fafb',
   },
-  coverImage: {
+  scrollContent: {
+    paddingBottom: 32,
+  },
+  heroSection: {
     width: '100%',
-    height: 250,
+    height: 280,
+    backgroundColor: '#e5e7eb',
+    position: 'relative',
+  },
+  heroImage: {
+    width: '100%',
+    height: '100%',
   },
   backButton: {
     position: 'absolute',
-    top: 50,
-    left: 20,
-    zIndex: 10,
-    backgroundColor: '#fff',
-    borderRadius: 20,
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
+    top: 48,
+    left: 16,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
     alignItems: 'center',
-    elevation: 5,
+    justifyContent: 'center',
+    elevation: 6,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
   },
-  scrollView: {
-    flex: 1,
+  contentPanel: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    marginTop: -30,
+    paddingHorizontal: 24,
+    paddingTop: 28,
+    paddingBottom: 32,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
   },
-  scrollContent: {
-    padding: 20,
+  titleSection: {
+    marginBottom: 24,
   },
-  titulo: {
+  title: {
     fontSize: 28,
-    fontWeight: 'bold',
+    fontWeight: '900',
     color: '#0027a6ff',
-    marginBottom: 15,
+    marginBottom: 14,
+    lineHeight: 34,
   },
-  enderecoContainer: {
+  addressRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginBottom: 25,
-    paddingBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    backgroundColor: 'transparent',
+    marginBottom: 24,
+    gap: 10,
   },
-  endereco: {
-    fontSize: 16,
+  addressText: {
+    fontSize: 15,
     color: '#666',
-    marginLeft: 8,
     flex: 1,
     lineHeight: 22,
+    fontWeight: '400',
   },
-  secao: {
-    marginBottom: 30,
-  },
-  secaoTitulo: {
-    fontSize: 20,
-    fontWeight: 'bold',
+  sectionTitle: {
+    fontSize: 19,
+    fontWeight: '900',
     color: '#0027a6ff',
-    marginBottom: 12,
+    marginBottom: 14,
   },
-  descricao: {
-    fontSize: 16,
-    color: '#333',
-    lineHeight: 24,
-    textAlign: 'justify',
+  description: {
+    fontSize: 15,
+    color: '#4b5563',
+    lineHeight: 28,
+    fontWeight: '400',
   },
-  avaliacoesContainer: {
+  aboutSection: {
+    marginBottom: 28,
+  },
+  ratingsSection: {
+    marginTop: 28,
+    paddingTop: 28,
+    borderTopWidth: 1,
+    borderTopColor: '#e5e7eb',
+  },
+  ratingsContainer: {
     alignItems: 'flex-start',
   },
-  estrelas: {
+  stars: {
     fontSize: 28,
     marginBottom: 8,
   },
-  avaliacaoTexto: {
+  ratingsText: {
     fontSize: 14,
-    color: '#888',
+    color: '#6b7280',
     fontStyle: 'italic',
-  },
-  espacoFinal: {
-    height: 30,
   },
 });
 

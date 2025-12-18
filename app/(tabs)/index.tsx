@@ -1,7 +1,9 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import {
+    Alert,
     FlatList,
     Image,
+    Modal,
     ScrollView,
     StyleSheet,
     Text,
@@ -10,8 +12,12 @@ import {
     View,
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
+import { FontAwesome } from '@expo/vector-icons';
 import MapComponent from '../../components/MapComponent';
 import axios from 'axios';
+
+// Admin password
+const ADMIN_PASSWORD = '1234';
 
 export default function Index() {
     const router = useRouter();
@@ -24,6 +30,10 @@ export default function Index() {
 
     // <-- ESTADO DA VISUALIZAÇÃO: false = mapa, true = lista
     const [visualizacaoLista, setVisualizacaoLista] = useState(false);
+
+    // <-- ESTADO DO MODAL DE ADMIN
+    const [adminModalVisible, setAdminModalVisible] = useState(false);
+    const [adminPassword, setAdminPassword] = useState('');
 
     // 📍 Lista de pontos no mapa (JSON FAKE DO MARVIO)
    const PONTOS_ESTATICOS = [
@@ -201,6 +211,23 @@ export default function Index() {
         // 4. Retorne a lista filtrada pelos dois critérios
         return resultado;
     }, [filtroAtivo, textoBusca, locais]); // Atualiza quando filtroAtivo, textoBusca ou locais mudar
+
+    // <-- FUNÇÃO PARA LIDAR COM ACESSO ADMIN
+    const handleAdminAccess = useCallback(() => {
+        if (adminPassword === ADMIN_PASSWORD) {
+            setAdminModalVisible(false);
+            setAdminPassword('');
+            router.push('/admin-aprovacao');
+        } else {
+            Alert.alert('Acesso Negado', 'Senha incorreta. Tente novamente.');
+            setAdminPassword('');
+        }
+    }, [adminPassword, router]);
+
+    const handleCloseAdminModal = useCallback(() => {
+        setAdminModalVisible(false);
+        setAdminPassword('');
+    }, []);
 
     // <-- FUNÇÃO DO CLIQUE: O que o botão faz
     const handleFiltroPress = (filtro) => {
@@ -387,6 +414,14 @@ export default function Index() {
                         <Text style={styles.toggleButtonText}>Ver Lista 📄</Text>
                     </TouchableOpacity>
 
+                    {/* <-- BOTÃO ADMIN FAB (FLOATING ACTION BUTTON) */}
+                    <TouchableOpacity
+                        style={styles.adminFab}
+                        onPress={() => setAdminModalVisible(true)}
+                    >
+                        <FontAwesome name="lock" size={24} color="#fff" />
+                    </TouchableOpacity>
+
                     {/* <-- CONTAINER DOS BOTÕES COM A LÓGICA CORRIGIDA - SÓ NO MODO MAPA */}
                     {!visualizacaoLista && (
                         <View style={styles.filterButtonsContainer}>
@@ -429,6 +464,47 @@ export default function Index() {
                     )}
                 </View>
             )}
+
+            {/* <-- MODAL DE ACESSO ADMINISTRATIVO */}
+            <Modal
+                visible={adminModalVisible}
+                transparent
+                animationType="fade"
+                onRequestClose={handleCloseAdminModal}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>Acesso Administrativo</Text>
+                        <Text style={styles.modalSubtitle}>Digite a senha para continuar</Text>
+
+                        <TextInput
+                            style={styles.modalInput}
+                            placeholder="Senha"
+                            placeholderTextColor="#999"
+                            secureTextEntry
+                            value={adminPassword}
+                            onChangeText={setAdminPassword}
+                            onSubmitEditing={handleAdminAccess}
+                        />
+
+                        <View style={styles.modalButtonsRow}>
+                            <TouchableOpacity
+                                style={[styles.modalButton, styles.modalButtonCancel]}
+                                onPress={handleCloseAdminModal}
+                            >
+                                <Text style={styles.modalButtonTextCancel}>Cancelar</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={[styles.modalButton, styles.modalButtonEnter]}
+                                onPress={handleAdminAccess}
+                            >
+                                <Text style={styles.modalButtonTextEnter}>Entrar</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 }
@@ -572,6 +648,93 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontWeight: 'bold',
         fontSize: 14,
+    },
+    // <-- BOTÃO ADMIN FAB
+    adminFab: {
+        position: 'absolute',
+        bottom: 100,
+        left: 20,
+        zIndex: 999,
+        backgroundColor: '#333333',
+        width: 56,
+        height: 56,
+        borderRadius: 28,
+        alignItems: 'center',
+        justifyContent: 'center',
+        elevation: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+    },
+    // <-- MODAL STYLES
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    modalContent: {
+        backgroundColor: '#fff',
+        borderRadius: 16,
+        padding: 24,
+        width: '85%',
+        maxWidth: 320,
+        elevation: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#0027a6ff',
+        marginBottom: 8,
+        textAlign: 'center',
+    },
+    modalSubtitle: {
+        fontSize: 14,
+        color: '#666',
+        marginBottom: 16,
+        textAlign: 'center',
+    },
+    modalInput: {
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 8,
+        paddingHorizontal: 12,
+        paddingVertical: 10,
+        fontSize: 16,
+        marginBottom: 20,
+        color: '#000',
+    },
+    modalButtonsRow: {
+        flexDirection: 'row',
+        gap: 12,
+    },
+    modalButton: {
+        flex: 1,
+        paddingVertical: 12,
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    modalButtonCancel: {
+        backgroundColor: '#e0e0e0',
+    },
+    modalButtonEnter: {
+        backgroundColor: '#0027a6ff',
+    },
+    modalButtonTextCancel: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#333',
+    },
+    modalButtonTextEnter: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#fff',
     },
     // <-- ESTILOS DOS CHIPS (FILTROS HORIZONTAIS NO MODO LISTA)
     chipsContainer: {

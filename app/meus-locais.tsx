@@ -16,6 +16,11 @@ interface LocalItem {
 const USER_ID = 1;
 const API_URL = 'https://guia-santa-cruz-api.onrender.com';
 
+// Helper function to check if status is approved (case-insensitive)
+const isStatusApproved = (status: string | undefined): boolean => {
+  return String(status || '').toLowerCase().trim() === 'aprovado';
+};
+
 const MeusLocaisScreen: React.FC = () => {
   const router = useRouter();
   const [data, setData] = useState<LocalItem[]>([]);
@@ -36,10 +41,7 @@ const MeusLocaisScreen: React.FC = () => {
     }
   }, []);
 
-  useEffect(() => {
-    fetchLocais();
-  }, [fetchLocais]);
-
+  // Auto-refresh quando a tela ganha foco
   useFocusEffect(
     useCallback(() => {
       fetchLocais();
@@ -93,11 +95,11 @@ const MeusLocaisScreen: React.FC = () => {
         imageSource = { uri };
     }
 
-    const isApproved = String(item.status_validacao).toLowerCase() === 'aprovado';
+    const isApproved = isStatusApproved(item.status_validacao);
 
     return (
       <View style={styles.card}>
-        <View style={styles.cardLeft}>
+        <TouchableOpacity style={styles.cardLeft} onPress={() => router.push({ pathname: '/detalhes-local', params: { id: String(item.id) } })} activeOpacity={0.8}>
           {imageSource ? (
             <Image source={imageSource} style={styles.thumbnail} resizeMode="cover" />
           ) : (
@@ -116,7 +118,7 @@ const MeusLocaisScreen: React.FC = () => {
               </Text>
             </View>
           </View>
-        </View>
+        </TouchableOpacity>
         <TouchableOpacity
             style={{ padding: 10 }}
             onPress={() => handleDelete(item.id)}

@@ -37,8 +37,6 @@ export default function MapComponent({ pontos, style }: MapComponentProps) {
                         latitude: ponto.latitude,
                         longitude: ponto.longitude,
                     }}
-                    title={ponto.title}
-                    description={ponto.description}
                     pinColor={ponto.pinColor || 'red'}
                     onPress={() => {
                         router.push({
