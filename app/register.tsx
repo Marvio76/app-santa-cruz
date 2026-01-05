@@ -10,7 +10,7 @@ import {
   View,
   Alert
 } from 'react-native';
-import RegisterForm from '../components/ui/RegisterForm'; 
+import RegisterForm from '../components/ui/RegisterForm';
 import axios from 'axios';
 
 const API_URL = 'https://guia-santa-cruz-api.onrender.com';
@@ -30,16 +30,15 @@ export default function RegisterScreen() {
     }
 
     try {
-      // Objeto corrigido para bater com o backend (espera 'senha')
+      // CORREÇÃO AQUI: Trocado 'senha' por 'password' para bater com o Backend
       const dadosParaApi = {
         nome: credentials.nome,
         email: credentials.email,
-        senha: credentials.password 
+        password: credentials.password
       };
 
-      // Manda o objeto corrigido
-      const response = await axios.post(`${API_URL}/api/auth/register`, dadosParaApi); 
-      
+      const response = await axios.post(`${API_URL}/api/auth/register`, dadosParaApi);
+
       console.log('API respondeu cadastro com sucesso:', response.data);
 
       Alert.alert('Sucesso!', 'Cadastro realizado. Faça o login para continuar.');

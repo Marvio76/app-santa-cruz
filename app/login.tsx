@@ -32,22 +32,26 @@ export default function LoginScreen() {
 
     try {
 
+      // CORREÇÃO 1: Mudamos de 'senha' para 'password' para o Backend entender
       const dadosParaApi = {
         email: credentials.email,
-        senha: credentials.password
+        password: credentials.password
       };
 
-      // Manda o objeto corrigido
       const response = await axios.post(`${API_URL}/api/auth/login`, dadosParaApi);
 
       console.log('API respondeu com sucesso:', response.data);
+
       // Persistir token e usuário no dispositivo
       if (response?.data?.token) {
         await AsyncStorage.setItem('token', response.data.token);
       }
-      if (response?.data?.usuario) {
-        await AsyncStorage.setItem('usuario', JSON.stringify(response.data.usuario));
+
+      // CORREÇÃO 2: O Backend retorna 'user', não 'usuario'
+      if (response?.data?.user) {
+        await AsyncStorage.setItem('usuario', JSON.stringify(response.data.user));
       }
+
       router.replace('/(tabs)');
 
     } catch (error: any) {
