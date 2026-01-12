@@ -43,7 +43,7 @@ export default function Index() {
             latitude: -5.80722,
             longitude: -41.95426,
             pinColor: 'orange', // <-- Vamo usar isso
-            image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80', // Restaurantes/Comércio de comida
+            image: 'https://res.cloudinary.com/dif50qjgs/image/upload/v1768257580/Fernandes_yvucw3.jpg', // Restaurantes/Comércio de comida
         },
         {
             title: 'Comercio Santa Cruz',
@@ -51,23 +51,23 @@ export default function Index() {
             latitude: -5.80395,
             longitude: -41.95365,
             pinColor: 'green', // <-- Vamo usar isso
-            image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80', // Restaurantes/Comércio de comida
+            image: 'https://res.cloudinary.com/dif50qjgs/image/upload/v1768257453/decasa_qiyo7b.jpg', // Restaurantes/Comércio de comida
         },
         {
-            title: 'Comercio olho d\'agua',
+            title: 'Comercio Santa Luzia',
             description: 'Espaço agradável com grande variedade de frutas, verduras e produtos naturais.',
             latitude: -5.79952,
             longitude: -41.95657,
             pinColor: 'green',
-            image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80', // Restaurantes/Comércio de comida
+            image: 'https://res.cloudinary.com/dif50qjgs/image/upload/v1768256886/Santa-luzia_eskgyw.jpg', // Restaurantes/Comércio de comida
         },
         {
-            title: 'Comercio Azevedo',
+            title: 'Comercio Oliveira',
             description: 'Frutaria bem localizada, com excelente qualidade e preços acessíveis.',
             latitude: -5.80339,
             longitude: -41.96101,
             pinColor: 'green',
-            image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80', // Restaurantes/Comércio de comida
+            image: 'https://res.cloudinary.com/dif50qjgs/image/upload/v1768256678/mercado-oliveira_vg4ttz.jpg', // Restaurantes/Comércio de comida
         },
         {
             title: 'Olho a Agua',
@@ -75,23 +75,23 @@ export default function Index() {
             latitude: -5.79965,
             longitude: -41.95587,
             pinColor: 'blue', // <-- Vamo usar isso (Ponto Turístico)
-            image: 'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?auto=format&fit=crop&w=800&q=80', // Natureza/Olho d'água
+            image: 'https://res.cloudinary.com/dif50qjgs/image/upload/v1768257680/olho-d-agua_eabzkf.jpg', // Natureza/Olho d'água
         },
         {
-            title: 'Comercio Central',
+            title: 'Mercearia Alves',
             description: 'Loja tradicional com produtos variados e ótimo atendimento aos moradores locais.',
             latitude: -5.80292,
             longitude: -41.9615,
             pinColor: 'orange',
-            image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80', // Restaurantes/Comércio de comida
+            image: 'https://res.cloudinary.com/dif50qjgs/image/upload/v1768257311/Mercearia-Alves_osmskr.jpg', // Restaurantes/Comércio de comida
         },
         {
-            title: 'Comercio Sao Jose',
+            title: 'Supermercado Soares',
             description: 'Frutaria familiar com atendimento simpático e produtos de excelente qualidade.',
             latitude: -5.80067,
             longitude: -41.95818,
             pinColor: 'green',
-            image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80', // Restaurantes/Comércio de comida
+            image: 'https://res.cloudinary.com/dif50qjgs/image/upload/v1768255407/supermercado_Soares_r7wudm.jpg', // Restaurantes/Comércio de comida
         },
         {
             title: 'Comercio Chico julia',
@@ -99,7 +99,7 @@ export default function Index() {
             latitude: -5.80315,
             longitude: -41.95365,
             pinColor: 'green',
-            image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80', // Restaurantes/Comércio de comida
+            image: 'https://res.cloudinary.com/dif50qjgs/image/upload/v1768256111/mercado-Chico-Julia_v1avtl.png',
         },
         {
             title: 'Comercio Ze Omano',
@@ -107,7 +107,7 @@ export default function Index() {
             latitude: -5.80355,
             longitude: -41.95297,
             pinColor: 'orange',
-            image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80', // Restaurantes/Comércio de comida
+            image: 'https://res.cloudinary.com/dif50qjgs/image/upload/v1768257776/omano_e2cmni.jpg', // Restaurantes/Comércio de comida
         },
         {
             title: 'Academia FitLife',
@@ -115,7 +115,7 @@ export default function Index() {
             latitude: -5.79944,
             longitude: -41.95658,
             pinColor: 'purple', // <-- Vamo usar isso
-            image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=800&q=80', // Academias
+            image: 'https://res.cloudinary.com/dif50qjgs/image/upload/v1768256886/Santa-luzia_eskgyw.jpg', // Academias
         },
         {
             title: 'Lava-jato Gustavo',
