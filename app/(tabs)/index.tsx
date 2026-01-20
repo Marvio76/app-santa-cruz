@@ -19,6 +19,21 @@ import axios from 'axios';
 // Admin password
 const ADMIN_PASSWORD = '1234';
 
+// Tipagem mínima para dados vindos da API
+interface APILocal {
+    id?: number;
+    nome?: string;
+    title?: string;
+    description?: string;
+    latitude?: number | string;
+    longitude?: number | string;
+    foto?: string | null;
+    imagem?: string | null;
+    image?: string | null;
+    status_validacao?: string | null;
+    [key: string]: any;
+}
+
 export default function Index() {
     const router = useRouter();
 
@@ -138,11 +153,20 @@ export default function Index() {
     // Estado que conterá estáticos + API
     const [locais, setLocais] = useState(PONTOS_ESTATICOS);
 
+    // Helper para normalizar URIs de imagem
+    const getImageUri = (fotoOrImage?: any) => {
+        if (!fotoOrImage) return undefined;
+        const s = String(fotoOrImage).trim();
+        if (s.startsWith('http')) return s;
+        if (s.startsWith('data:image')) return s;
+        return `data:image/jpeg;base64,${s}`;
+    };
+
     // Buscar locais da API e combinar
     const fetchLocais = useCallback(async () => {
         try {
             const response = await axios.get('https://guia-santa-cruz-api.onrender.com/api/locais');
-            const apiData = Array.isArray(response.data) ? response.data : [];
+            const apiData: APILocal[] = Array.isArray(response.data) ? response.data : [];
             // Padroniza campos vindos da API para o formato dos pontos estáticos
             const normalizados = apiData
                 .map((item) => {
@@ -151,16 +175,20 @@ export default function Index() {
                     const description = item.description || item.sobre || '';
                     const latitude = typeof item.latitude === 'number' ? item.latitude : parseFloat(String(item.latitude));
                     const longitude = typeof item.longitude === 'number' ? item.longitude : parseFloat(String(item.longitude));
-                    const foto = item.foto || undefined;
-                    const image = item.image || item.imagem || foto || undefined;
+                    const foto = item.foto || item.imagem || item.image || undefined;
+                    const imageRaw = item.image || item.imagem || foto || undefined;
+                    const image = getImageUri(imageRaw) || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80';
                     if (!title || Number.isNaN(latitude) || Number.isNaN(longitude)) return null;
+
+                    // Mostra TODOS os locais da API sem filtro
                     return {
                         title,
                         description,
                         latitude,
                         longitude,
                         foto,
-                        image: image || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80',
+                        image,
+                        status_validacao: item.status_validacao,
                         // pinColor default, sem categorização vinda da API
                         pinColor: 'orange',
                     };
@@ -179,7 +207,7 @@ export default function Index() {
     useFocusEffect(
         useCallback(() => {
             fetchLocais();
-        }, [fetchLocais])
+        }, [])
     );
 
     // <-- LÓGICA DO FILTRO: Roda só quando o filtroAtivo ou textoBusca mudar
@@ -276,6 +304,7 @@ export default function Index() {
                 />
                 <View style={styles.listCardContent}>
                     <Text style={styles.listCardTitle}>{item.title}</Text>
+                    {item.status_validacao && <Text style={{ fontSize: 12, color: '#999', marginBottom: 4 }}>Status: {item.status_validacao}</Text>}
                     <Text style={styles.listCardDescription} numberOfLines={2}>
                         {item.description}
                     </Text>

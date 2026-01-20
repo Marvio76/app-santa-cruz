@@ -2,6 +2,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { Alert, FlatList, Image, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useFocusEffect, useRouter, Stack } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface LocalPendente {
   id: number;
@@ -26,7 +27,8 @@ export default function AdminAprovacaoScreen() {
       const res = await fetch(`${API_URL}/api/locais?status=pendente`);
       if (!res.ok) throw new Error('Falha ao buscar locais pendentes');
       const json = await res.json();
-      setData(Array.isArray(json) ? json : []);
+        console.log('admin-aprovacao - pendentes:', json);
+        setData(Array.isArray(json) ? json : []);
     } catch (e: any) {
       console.error(e);
       Alert.alert('Erro', 'Não foi possível carregar os locais pendentes.');
@@ -54,10 +56,17 @@ export default function AdminAprovacaoScreen() {
     async (id: number, nome: string) => {
       try {
         setProcessingId(id);
+        const token = await AsyncStorage.getItem('token');
+        if (!token) {
+          Alert.alert('Erro de Sessão', 'Você precisa estar logado para aprovar.');
+          setProcessingId(null);
+          return;
+        }
+
         const res = await fetch(`${API_URL}/api/locais/${id}/status`, {
           method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: 'aprovado' }),
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ status_validacao: 'aprovado' }),
         });
 
         if (!res.ok) {
@@ -70,7 +79,7 @@ export default function AdminAprovacaoScreen() {
         Alert.alert('Sucesso', `"${nome}" foi aprovado!`);
       } catch (e: any) {
         console.error(e);
-        Alert.alert('Erro', 'Não foi poss��vel aprovar o local.');
+        Alert.alert('Erro', 'Não foi possível aprovar o local.');
       } finally {
         setProcessingId(null);
       }
@@ -88,10 +97,17 @@ export default function AdminAprovacaoScreen() {
           onPress: async () => {
             try {
               setProcessingId(id);
+              const token = await AsyncStorage.getItem('token');
+              if (!token) {
+                Alert.alert('Erro de Sessão', 'Você precisa estar logado para rejeitar.');
+                setProcessingId(null);
+                return;
+              }
+
               const res = await fetch(`${API_URL}/api/locais/${id}/status`, {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: 'rejeitado' }),
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ status_validacao: 'rejeitado' }),
               });
 
               if (!res.ok) {
@@ -118,11 +134,15 @@ export default function AdminAprovacaoScreen() {
   const renderItem = useCallback(
     ({ item }: { item: LocalPendente }) => {
       let imageSource = undefined;
-
       if (item.foto) {
-        const hasPrefix = item.foto.startsWith('data:image');
-        const uri = hasPrefix ? item.foto : `data:image/jpeg;base64,${item.foto}`;
-        imageSource = { uri };
+        const foto = String(item.foto).trim();
+        if (foto.startsWith('http')) {
+          imageSource = { uri: foto };
+        } else if (foto.startsWith('data:image')) {
+          imageSource = { uri: foto };
+        } else {
+          imageSource = { uri: `data:image/jpeg;base64,${foto}` };
+        }
       }
 
       const isProcessing = processingId === item.id;

@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, FlatList, Image, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useFocusEffect, useRouter, Stack } from 'expo-router'; // <--- Adicionei o Stack aqui
 import { FontAwesome } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Types
 interface LocalItem {
@@ -13,12 +14,20 @@ interface LocalItem {
 }
 
 // ID 1 confirmado pelo Beekeeper
-const USER_ID = 1;
 const API_URL = 'https://guia-santa-cruz-api.onrender.com';
 
 // Helper function to check if status is approved (case-insensitive)
 const isStatusApproved = (status: string | undefined): boolean => {
   return String(status || '').toLowerCase().trim() === 'aprovado';
+};
+
+// Helper to normalize image URIs: returns undefined when no image (placeholder shown by UI)
+const getImageUri = (foto?: string | null) => {
+  if (!foto) return undefined;
+  const f = String(foto).trim();
+  if (f.startsWith('http')) return f;
+  if (f.startsWith('data:image')) return f;
+  return `data:image/jpeg;base64,${f}`;
 };
 
 const MeusLocaisScreen: React.FC = () => {
@@ -30,9 +39,23 @@ const MeusLocaisScreen: React.FC = () => {
   const fetchLocais = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${API_URL}/api/locais/usuario/${USER_ID}`);
+
+      const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        setData([]);
+        return;
+      }
+
+      const res = await fetch(`${API_URL}/api/locais/meus/locais`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
       if (!res.ok) throw new Error('Falha ao buscar os locais');
       const json = await res.json();
+      console.log('meus-locais - fetch:', json);
       setData(Array.isArray(json) ? json : []);
     } catch (e: any) {
       console.error(e);
@@ -66,7 +89,19 @@ const MeusLocaisScreen: React.FC = () => {
           style: 'destructive',
           onPress: async () => {
             try {
-              const res = await fetch(`${API_URL}/api/locais/${id}`, { method: 'DELETE' });
+              const token = await AsyncStorage.getItem('token');
+              if (!token) {
+                Alert.alert('Erro de Sessão', 'Você precisa estar logado para excluir um local.');
+                return;
+              }
+
+              const res = await fetch(`${API_URL}/api/locais/${id}`, {
+                method: 'DELETE',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`,
+                },
+              });
 
               if (!res.ok) {
                  const text = await res.text();
@@ -87,13 +122,8 @@ const MeusLocaisScreen: React.FC = () => {
   );
 
   const renderItem = useCallback(({ item }: { item: LocalItem }) => {
-    let imageSource = undefined;
-
-    if (item.foto) {
-        const hasPrefix = item.foto.startsWith('data:image');
-        const uri = hasPrefix ? item.foto : `data:image/jpeg;base64,${item.foto}`;
-        imageSource = { uri };
-    }
+    const uri = getImageUri(item.foto);
+    const imageSource = uri ? { uri } : undefined;
 
     const isApproved = isStatusApproved(item.status_validacao);
 

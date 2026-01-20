@@ -45,6 +45,8 @@ export default function DetalhesLocalScreen() {
           throw new Error(text || 'Falha ao buscar o local');
         }
         const json = await res.json();
+        // Log para debug do que vem da API
+        console.log('detalhes-local - foto:', json?.foto);
         setData(json || null);
       } catch (e: any) {
         setError(e?.message || 'Erro ao carregar');
@@ -58,10 +60,23 @@ export default function DetalhesLocalScreen() {
   }, [id]);
 
   const imageSource = useMemo(() => {
-    if (!data?.foto) return undefined;
-    const hasPrefix = data.foto.startsWith('data:image');
-    const uri = hasPrefix ? data.foto : `data:image/jpeg;base64,${data.foto}`;
-    return { uri } as const;
+    const foto = data?.foto;
+    if (!foto) return undefined;
+
+    const trimmed = String(foto).trim();
+
+    // URL completa
+    if (trimmed.startsWith('http')) {
+      return { uri: trimmed } as const;
+    }
+
+    // Já tem prefixo data:image
+    if (trimmed.startsWith('data:image')) {
+      return { uri: trimmed } as const;
+    }
+
+    // Assume base64 puro -> prefixa como jpeg
+    return { uri: `data:image/jpeg;base64,${trimmed}` } as const;
   }, [data?.foto]);
 
   const isApproved = useMemo(() => isStatusApproved(data?.status_validacao), [data?.status_validacao]);
