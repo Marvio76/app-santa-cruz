@@ -246,10 +246,7 @@ export default function Index() {
         return resultado;
     }, [filtroAtivo, textoBusca, locais]);
 
-    // <-- MODO APRESENTAÇÃO: RETORNA TUDO
-    const locaisFiltrados = useMemo(() => {
-        return locais; 
-    }, [locais]);
+    // <-- MODO APRESENTAÇÃO: RETORNA TUDO (REMOVIDO - USAR pontosFiltrados)
 
     const handleFiltroPress = (filtro) => {
         if (filtroAtivo === filtro) {
@@ -317,7 +314,7 @@ export default function Index() {
                     />
 
                     <FlatList
-                        data={locaisFiltrados}
+                        data={pontosFiltrados}
                         renderItem={renderListItem}
                         keyExtractor={(item, index) => index.toString()}
                         contentContainerStyle={styles.listContent}
@@ -336,7 +333,7 @@ export default function Index() {
                                     <Text style={[styles.chipText, filtroAtivo === 'Academias' && styles.chipTextActive]}>Academias</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity style={[styles.chip, filtroAtivo === 'Restaurantes' && styles.chipActive]} onPress={() => handleFiltroPress('Restaurantes')}>
-                                    <Text style={[styles.chipText, filtroAtivo === 'Restaurantes' && styles.chipTextActive]}>Restaurantes</Text>
+                                    <Text style={[styles.chipText, filtroAtivo === 'Restaurantes' && styles.chipTextActive]}>Comercio</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity style={[styles.chip, filtroAtivo === 'Pontos Turísticos' && styles.chipActive]} onPress={() => handleFiltroPress('Pontos Turísticos')}>
                                     <Text style={[styles.chipText, filtroAtivo === 'Pontos Turísticos' && styles.chipTextActive]}>Pontos Turísticos</Text>
@@ -355,7 +352,7 @@ export default function Index() {
             ) : (
                 // <-- VISUALIZAÇÃO NO MAPA
                 <View style={styles.mapContainer}>
-                    <MapComponent pontos={locaisFiltrados} style={styles.map} />
+                    <MapComponent pontos={pontosFiltrados} style={styles.map} />
 
                     <TextInput
                         placeholder="Aonde você quer ir?"
