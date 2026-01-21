@@ -10,6 +10,7 @@ import {
     TextInput,
     TouchableOpacity,
     View,
+    RefreshControl, // Importante para puxar pra baixo e atualizar
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
@@ -18,6 +19,10 @@ import axios from 'axios';
 
 // Admin password
 const ADMIN_PASSWORD = '1234';
+
+// Coordenadas padrão (Centro de Santa Cruz) para fallback caso venha zerado
+const DEFAULT_LAT = -5.80395;
+const DEFAULT_LONG = -41.95365;
 
 // Tipagem mínima para dados vindos da API
 interface APILocal {
@@ -46,27 +51,30 @@ export default function Index() {
     // <-- ESTADO DA VISUALIZAÇÃO: false = mapa, true = lista
     const [visualizacaoLista, setVisualizacaoLista] = useState(false);
 
+    // <-- ESTADO DO REFRESH (PUXAR PRA BAIXO)
+    const [refreshing, setRefreshing] = useState(false);
+
     // <-- ESTADO DO MODAL DE ADMIN
     const [adminModalVisible, setAdminModalVisible] = useState(false);
     const [adminPassword, setAdminPassword] = useState('');
 
-    // 📍 Lista de pontos no mapa (JSON FAKE DO MARVIO)
-   const PONTOS_ESTATICOS = [
+    // 📍 Lista de pontos estáticos
+    const PONTOS_ESTATICOS = [
         {
             title: 'Comercio Fernandes',
             description: 'Um comércio local conhecido pelo bom atendimento e variedade de produtos da região.',
             latitude: -5.80722,
             longitude: -41.95426,
-            pinColor: 'orange', // <-- Vamo usar isso
-            image: 'https://res.cloudinary.com/dif50qjgs/image/upload/v1768257580/Fernandes_yvucw3.jpg', // Restaurantes/Comércio de comida
+            pinColor: 'orange',
+            image: 'https://res.cloudinary.com/dif50qjgs/image/upload/v1768257580/Fernandes_yvucw3.jpg',
         },
         {
             title: 'Comercio Santa Cruz',
             description: 'Frutaria com frutas sempre frescas e selecionadas, direto dos produtores locais.',
             latitude: -5.80395,
             longitude: -41.95365,
-            pinColor: 'green', // <-- Vamo usar isso
-            image: 'https://res.cloudinary.com/dif50qjgs/image/upload/v1768257453/decasa_qiyo7b.jpg', // Restaurantes/Comércio de comida
+            pinColor: 'green',
+            image: 'https://res.cloudinary.com/dif50qjgs/image/upload/v1768257453/decasa_qiyo7b.jpg',
         },
         {
             title: 'Comercio Santa Luzia',
@@ -74,7 +82,7 @@ export default function Index() {
             latitude: -5.79952,
             longitude: -41.95657,
             pinColor: 'green',
-            image: 'https://res.cloudinary.com/dif50qjgs/image/upload/v1768256886/Santa-luzia_eskgyw.jpg', // Restaurantes/Comércio de comida
+            image: 'https://res.cloudinary.com/dif50qjgs/image/upload/v1768256886/Santa-luzia_eskgyw.jpg',
         },
         {
             title: 'Comercio Oliveira',
@@ -82,15 +90,15 @@ export default function Index() {
             latitude: -5.80339,
             longitude: -41.96101,
             pinColor: 'green',
-            image: 'https://res.cloudinary.com/dif50qjgs/image/upload/v1768256678/mercado-oliveira_vg4ttz.jpg', // Restaurantes/Comércio de comida
+            image: 'https://res.cloudinary.com/dif50qjgs/image/upload/v1768256678/mercado-oliveira_vg4ttz.jpg',
         },
         {
             title: 'Olho a Agua',
             description: 'Ponto natural muito visitado, com nascente de água limpa e paisagem tranquila.',
             latitude: -5.79965,
             longitude: -41.95587,
-            pinColor: 'blue', // <-- Vamo usar isso (Ponto Turístico)
-            image: 'https://res.cloudinary.com/dif50qjgs/image/upload/v1768257680/olho-d-agua_eabzkf.jpg', // Natureza/Olho d'água
+            pinColor: 'blue',
+            image: 'https://res.cloudinary.com/dif50qjgs/image/upload/v1768257680/olho-d-agua_eabzkf.jpg',
         },
         {
             title: 'Mercearia Alves',
@@ -98,7 +106,7 @@ export default function Index() {
             latitude: -5.80292,
             longitude: -41.9615,
             pinColor: 'orange',
-            image: 'https://res.cloudinary.com/dif50qjgs/image/upload/v1768257311/Mercearia-Alves_osmskr.jpg', // Restaurantes/Comércio de comida
+            image: 'https://res.cloudinary.com/dif50qjgs/image/upload/v1768257311/Mercearia-Alves_osmskr.jpg',
         },
         {
             title: 'Supermercado Soares',
@@ -106,7 +114,7 @@ export default function Index() {
             latitude: -5.80067,
             longitude: -41.95818,
             pinColor: 'green',
-            image: 'https://res.cloudinary.com/dif50qjgs/image/upload/v1768255407/supermercado_Soares_r7wudm.jpg', // Restaurantes/Comércio de comida
+            image: 'https://res.cloudinary.com/dif50qjgs/image/upload/v1768255407/supermercado_Soares_r7wudm.jpg',
         },
         {
             title: 'Comercio Chico julia',
@@ -122,15 +130,15 @@ export default function Index() {
             latitude: -5.80355,
             longitude: -41.95297,
             pinColor: 'orange',
-            image: 'https://res.cloudinary.com/dif50qjgs/image/upload/v1768257776/omano_e2cmni.jpg', // Restaurantes/Comércio de comida
+            image: 'https://res.cloudinary.com/dif50qjgs/image/upload/v1768257776/omano_e2cmni.jpg',
         },
         {
             title: 'Academia FitLife',
-            description: 'Academia moderna e bem equipada, ideal para quem busca saúde e bem-estar.',
+            description: 'Localizada no 1º andar (em cima do comércio). Academia moderna e bem equipada, ideal para quem busca saúde e bem-estar.',
             latitude: -5.79944,
             longitude: -41.95658,
-            pinColor: 'purple', // <-- Vamo usar isso
-            image: 'https://res.cloudinary.com/dif50qjgs/image/upload/v1768256886/Santa-luzia_eskgyw.jpg', // Academias
+            pinColor: 'purple',
+            image: 'https://res.cloudinary.com/dif50qjgs/image/upload/v1768256886/Santa-luzia_eskgyw.jpg',
         },
         {
             title: 'Lava-jato Gustavo',
@@ -138,15 +146,15 @@ export default function Index() {
             latitude: -5.80701,
             longitude: -41.96138,
             pinColor: 'cyan',
-            image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80', // Comércio genérico
+            image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80',
         },
         {
             title: 'Pousada Ailton',
             description: 'Pousada acolhedora com ótimo conforto e atendimento, ideal para visitantes da cidade.',
             latitude: -5.81472,
             longitude: -41.95459,
-            pinColor: 'pink', // <-- Vamo usar isso
-            image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80', // Hotéis/Pousadas
+            pinColor: 'pink',
+            image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
         },
     ];
 
@@ -164,23 +172,40 @@ export default function Index() {
 
     // Buscar locais da API e combinar
     const fetchLocais = useCallback(async () => {
+        setRefreshing(true);
         try {
             const response = await axios.get('https://guia-santa-cruz-api.onrender.com/api/locais');
             const apiData: APILocal[] = Array.isArray(response.data) ? response.data : [];
-            // Padroniza campos vindos da API para o formato dos pontos estáticos
+            console.log('Locais da API recebidos:', apiData.length);
+            
+            // Padroniza campos vindos da API
             const normalizados = apiData
                 .map((item) => {
-                    // Campos possíveis: nome/sobre/latitude/longitude/foto/image
-                    const title = item.title || item.nome || '';
-                    const description = item.description || item.sobre || '';
-                    const latitude = typeof item.latitude === 'number' ? item.latitude : parseFloat(String(item.latitude));
-                    const longitude = typeof item.longitude === 'number' ? item.longitude : parseFloat(String(item.longitude));
+                    // CORREÇÃO: Tenta pegar o nome de 'title' ou 'nome'
+                    const title = item.title || item.nome || 'Local Sem Nome';
+                    
+                    // CORREÇÃO: Tenta pegar descrição de VÁRIOS campos (inclusive endereço se faltar descrição)
+                    const description = item.descricao || item.description || item.sobre || item.endereco || 'Toque para ver detalhes...';
+                    
+                    // CORREÇÃO: Tratamento robusto para Latitude/Longitude
+                    // Converte para string primeiro, garante ponto no lugar de vírgula, depois parseFloat
+                    let latitude = parseFloat(String(item.latitude || '').replace(',', '.'));
+                    let longitude = parseFloat(String(item.longitude || '').replace(',', '.'));
+                    
+                    // Se a coordenada vier inválida (NaN) ou zerada, usa o fallback para o local não sumir
+                    if (Number.isNaN(latitude) || latitude === 0) {
+                        // console.warn(`Local ${title} sem latitude válida.`); // Silenciado para limpar o log
+                        latitude = DEFAULT_LAT;
+                    }
+                    if (Number.isNaN(longitude) || longitude === 0) {
+                        longitude = DEFAULT_LONG;
+                    }
+
                     const foto = item.foto || item.imagem || item.image || undefined;
                     const imageRaw = item.image || item.imagem || foto || undefined;
                     const image = getImageUri(imageRaw) || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80';
-                    if (!title || Number.isNaN(latitude) || Number.isNaN(longitude)) return null;
 
-                    // Mostra TODOS os locais da API sem filtro
+                    // Retorna o objeto formatado
                     return {
                         title,
                         description,
@@ -189,21 +214,23 @@ export default function Index() {
                         foto,
                         image,
                         status_validacao: item.status_validacao,
-                        // pinColor default, sem categorização vinda da API
-                        pinColor: 'orange',
+                        pinColor: 'orange', // Cor padrão para novos locais
                     };
-                })
-                .filter(Boolean);
+                });
 
+            // Junta tudo: Estáticos primeiro, depois os da API
             const listaCombinada = [...PONTOS_ESTATICOS, ...normalizados];
             setLocais(listaCombinada);
         } catch (e) {
-            // Em caso de erro, mantém os estáticos
+            console.error("Erro ao buscar locais:", e);
+            // Em caso de erro, mantém pelo menos os estáticos
             setLocais(PONTOS_ESTATICOS);
+        } finally {
+            setRefreshing(false);
         }
     }, []);
 
-    // Chama quando a tela ganha foco
+    // Chama quando a tela ganha foco (volta do Admin ou outra tela)
     useFocusEffect(
         useCallback(() => {
             fetchLocais();
@@ -212,10 +239,8 @@ export default function Index() {
 
     // <-- LÓGICA DO FILTRO: Roda só quando o filtroAtivo ou textoBusca mudar
     const pontosFiltrados = useMemo(() => {
-        // 1. Comece com a lista completa de pontos
         let resultado = locais;
 
-        // 2. Se filtroAtivo não for nulo, filtre os pontos pela pinColor
         if (filtroAtivo) {
             if (filtroAtivo === 'Academias') {
                 resultado = resultado.filter(p => p.pinColor === 'purple');
@@ -228,26 +253,28 @@ export default function Index() {
             }
         }
 
-        // 3. Se textoBusca não estiver vazio, filtre o resultado anterior verificando se o ponto.title inclui o texto digitado (case insensitive)
         if (textoBusca.trim() !== '') {
             const textoBuscaLower = textoBusca.toLowerCase().trim();
             resultado = resultado.filter(p =>
                 p.title.toLowerCase().includes(textoBuscaLower)
             );
         }
-
-        // 4. Retorne a lista filtrada pelos dois critérios
         return resultado;
-    }, [filtroAtivo, textoBusca, locais]); // Atualiza quando filtroAtivo, textoBusca ou locais mudar
+    }, [filtroAtivo, textoBusca, locais]);
 
-    // <-- FUNÇÃO PARA LIDAR COM ACESSO ADMIN
+    // <-- MODO APRESENTAÇÃO: RETORNA TUDO
+    const locaisFiltrados = useMemo(() => {
+        return locais; 
+    }, [locais]);
+
+    // <-- FUNÇÕES ADMIN
     const handleAdminAccess = useCallback(() => {
         if (adminPassword === ADMIN_PASSWORD) {
             setAdminModalVisible(false);
             setAdminPassword('');
             router.push('/admin-aprovacao');
         } else {
-            Alert.alert('Acesso Negado', 'Senha incorreta. Tente novamente.');
+            Alert.alert('Acesso Negado', 'Senha incorreta.');
             setAdminPassword('');
         }
     }, [adminPassword, router]);
@@ -257,18 +284,15 @@ export default function Index() {
         setAdminPassword('');
     }, []);
 
-    // <-- FUNÇÃO DO CLIQUE: O que o botão faz
     const handleFiltroPress = (filtro) => {
         if (filtroAtivo === filtro) {
-            setFiltroAtivo(null); // Limpa o filtro
+            setFiltroAtivo(null);
         } else {
-            setFiltroAtivo(filtro); // Bota o filtro
+            setFiltroAtivo(filtro);
         }
     };
 
-    // <-- FUNÇÃO PARA RENDERIZAR CADA ITEM DA LISTA
     const renderListItem = ({ item, index }) => {
-        // Encontra o índice do item na lista original de pontos
         const originalIndex = locais.findIndex(
             p => p.title === item.title &&
                  p.latitude === item.latitude &&
@@ -304,7 +328,7 @@ export default function Index() {
                 />
                 <View style={styles.listCardContent}>
                     <Text style={styles.listCardTitle}>{item.title}</Text>
-                    {item.status_validacao && <Text style={{ fontSize: 12, color: '#999', marginBottom: 4 }}>Status: {item.status_validacao}</Text>}
+                    {/* LEGENDA DE STATUS FOI REMOVIDA AQUI */}
                     <Text style={styles.listCardDescription} numberOfLines={2}>
                         {item.description}
                     </Text>
@@ -318,7 +342,6 @@ export default function Index() {
             {visualizacaoLista ? (
                 // <-- VISUALIZAÇÃO EM LISTA
                 <View style={styles.listContainer}>
-                    {/* <-- BARRA DE BUSCA */}
                     <TextInput
                         placeholder="Aonde você quer ir?"
                         placeholderTextColor="#888"
@@ -327,13 +350,22 @@ export default function Index() {
                         style={styles.searchBarList}
                     />
 
-                    {/* <-- FLATLIST COM OS PONTOS FILTRADOS */}
                     <FlatList
-                        data={pontosFiltrados}
+                        data={locaisFiltrados}
                         renderItem={renderListItem}
                         keyExtractor={(item, index) => index.toString()}
                         contentContainerStyle={styles.listContent}
                         showsVerticalScrollIndicator={false}
+                        // ADICIONADO PULL TO REFRESH
+                        refreshControl={
+                            <RefreshControl refreshing={refreshing} onRefresh={fetchLocais} />
+                        }
+                        ListEmptyComponent={
+                            <View style={styles.emptyContainer}>
+                                <FontAwesome name="inbox" size={48} color="#999" />
+                                <Text style={styles.emptyText}>Nenhum local encontrado</Text>
+                            </View>
+                        }
                         ListHeaderComponent={
                             <ScrollView
                                 horizontal
@@ -342,77 +374,33 @@ export default function Index() {
                                 contentContainerStyle={styles.chipsContent}
                             >
                                 <TouchableOpacity
-                                    style={[
-                                        styles.chip,
-                                        filtroAtivo === 'Academias' && styles.chipActive
-                                    ]}
+                                    style={[styles.chip, filtroAtivo === 'Academias' && styles.chipActive]}
                                     onPress={() => handleFiltroPress('Academias')}
                                 >
-                                    <Text
-                                        style={[
-                                            styles.chipText,
-                                            filtroAtivo === 'Academias' && styles.chipTextActive
-                                        ]}
-                                    >
-                                        Academias
-                                    </Text>
+                                    <Text style={[styles.chipText, filtroAtivo === 'Academias' && styles.chipTextActive]}>Academias</Text>
                                 </TouchableOpacity>
-
                                 <TouchableOpacity
-                                    style={[
-                                        styles.chip,
-                                        filtroAtivo === 'Restaurantes' && styles.chipActive
-                                    ]}
+                                    style={[styles.chip, filtroAtivo === 'Restaurantes' && styles.chipActive]}
                                     onPress={() => handleFiltroPress('Restaurantes')}
                                 >
-                                    <Text
-                                        style={[
-                                            styles.chipText,
-                                            filtroAtivo === 'Restaurantes' && styles.chipTextActive
-                                        ]}
-                                    >
-                                        Restaurantes
-                                    </Text>
+                                    <Text style={[styles.chipText, filtroAtivo === 'Restaurantes' && styles.chipTextActive]}>Restaurantes</Text>
                                 </TouchableOpacity>
-
                                 <TouchableOpacity
-                                    style={[
-                                        styles.chip,
-                                        filtroAtivo === 'Pontos Turísticos' && styles.chipActive
-                                    ]}
+                                    style={[styles.chip, filtroAtivo === 'Pontos Turísticos' && styles.chipActive]}
                                     onPress={() => handleFiltroPress('Pontos Turísticos')}
                                 >
-                                    <Text
-                                        style={[
-                                            styles.chipText,
-                                            filtroAtivo === 'Pontos Turísticos' && styles.chipTextActive
-                                        ]}
-                                    >
-                                        Pontos Turísticos
-                                    </Text>
+                                    <Text style={[styles.chipText, filtroAtivo === 'Pontos Turísticos' && styles.chipTextActive]}>Pontos Turísticos</Text>
                                 </TouchableOpacity>
-
                                 <TouchableOpacity
-                                    style={[
-                                        styles.chip,
-                                        filtroAtivo === 'Hotéis e Pousadas' && styles.chipActive
-                                    ]}
+                                    style={[styles.chip, filtroAtivo === 'Hotéis e Pousadas' && styles.chipActive]}
                                     onPress={() => handleFiltroPress('Hotéis e Pousadas')}
                                 >
-                                    <Text
-                                        style={[
-                                            styles.chipText,
-                                            filtroAtivo === 'Hotéis e Pousadas' && styles.chipTextActive
-                                        ]}
-                                    >
-                                        Hotéis e Pousadas
-                                    </Text>
+                                    <Text style={[styles.chipText, filtroAtivo === 'Hotéis e Pousadas' && styles.chipTextActive]}>Hotéis e Pousadas</Text>
                                 </TouchableOpacity>
                             </ScrollView>
                         }
                     />
 
-                    {/* <-- BOTÃO PARA VOLTAR AO MAPA */}
                     <TouchableOpacity
                         style={styles.toggleButton}
                         onPress={() => setVisualizacaoLista(false)}
@@ -423,10 +411,8 @@ export default function Index() {
             ) : (
                 // <-- VISUALIZAÇÃO NO MAPA
                 <View style={styles.mapContainer}>
-                    {/* <-- O MAPA AGORA USA OS PONTOS FILTRADOS */}
-                    <MapComponent pontos={pontosFiltrados} style={styles.map} />
+                    <MapComponent pontos={locaisFiltrados} style={styles.map} />
 
-                    {/* <-- BARRA DE BUSCA FLUTUANTE */}
                     <TextInput
                         placeholder="Aonde você quer ir?"
                         placeholderTextColor="#888"
@@ -435,7 +421,6 @@ export default function Index() {
                         style={styles.searchBar}
                     />
 
-                    {/* <-- BOTÃO PARA VER LISTA */}
                     <TouchableOpacity
                         style={styles.toggleButton}
                         onPress={() => setVisualizacaoLista(true)}
@@ -443,7 +428,6 @@ export default function Index() {
                         <Text style={styles.toggleButtonText}>Ver Lista 📄</Text>
                     </TouchableOpacity>
 
-                    {/* <-- BOTÃO ADMIN FAB (FLOATING ACTION BUTTON) */}
                     <TouchableOpacity
                         style={styles.adminFab}
                         onPress={() => setAdminModalVisible(true)}
@@ -451,43 +435,31 @@ export default function Index() {
                         <FontAwesome name="lock" size={24} color="#fff" />
                     </TouchableOpacity>
 
-                    {/* <-- CONTAINER DOS BOTÕES COM A LÓGICA CORRIGIDA - SÓ NO MODO MAPA */}
                     {!visualizacaoLista && (
                         <View style={styles.filterButtonsContainer}>
                             <TouchableOpacity
                                 style={[styles.filterButton, filtroAtivo === 'Academias' && styles.filterButtonActive]}
                                 onPress={() => handleFiltroPress('Academias')}
                             >
-                                <Text style={[styles.filterButtonText, filtroAtivo === 'Academias' && styles.filterButtonTextActive]}>
-                                    Academias
-                                </Text>
+                                <Text style={[styles.filterButtonText, filtroAtivo === 'Academias' && styles.filterButtonTextActive]}>Academias</Text>
                             </TouchableOpacity>
-
                             <TouchableOpacity
                                 style={[styles.filterButton, filtroAtivo === 'Restaurantes' && styles.filterButtonActive]}
                                 onPress={() => handleFiltroPress('Restaurantes')}
                             >
-                                <Text style={[styles.filterButtonText, filtroAtivo === 'Restaurantes' && styles.filterButtonTextActive]}>
-                                    Restaurantes
-                                </Text>
+                                <Text style={[styles.filterButtonText, filtroAtivo === 'Restaurantes' && styles.filterButtonTextActive]}>Restaurantes</Text>
                             </TouchableOpacity>
-
                             <TouchableOpacity
                                 style={[styles.filterButton, filtroAtivo === 'Pontos Turísticos' && styles.filterButtonActive]}
                                 onPress={() => handleFiltroPress('Pontos Turísticos')}
                             >
-                                <Text style={[styles.filterButtonText, filtroAtivo === 'Pontos Turísticos' && styles.filterButtonTextActive]}>
-                                    Pontos Turísticos
-                                </Text>
+                                <Text style={[styles.filterButtonText, filtroAtivo === 'Pontos Turísticos' && styles.filterButtonTextActive]}>Pontos Turísticos</Text>
                             </TouchableOpacity>
-
                             <TouchableOpacity
                                 style={[styles.filterButton, filtroAtivo === 'Hotéis e Pousadas' && styles.filterButtonActive]}
                                 onPress={() => handleFiltroPress('Hotéis e Pousadas')}
                             >
-                                <Text style={[styles.filterButtonText, filtroAtivo === 'Hotéis e Pousadas' && styles.filterButtonTextActive]}>
-                                    Hotéis e Pousadas
-                                </Text>
+                                <Text style={[styles.filterButtonText, filtroAtivo === 'Hotéis e Pousadas' && styles.filterButtonTextActive]}>Hotéis e Pousadas</Text>
                             </TouchableOpacity>
                         </View>
                     )}
@@ -585,24 +557,21 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
         shadowRadius: 4,
-        borderWidth: 2, // Borda pra destacar
-        borderColor: '#0027a6ff', // Borda da mesma cor
+        borderWidth: 2, 
+        borderColor: '#0027a6ff', 
     },
-    // <-- ESTILO DO BOTÃO ATIVO (FUNDO BRANCO)
     filterButtonActive: {
         backgroundColor: '#fff',
         borderColor: '#0027a6ff',
     },
     filterButtonText: {
-        color: '#fff', // TEXTO PADRÃO BRANCO
+        color: '#fff',
         fontWeight: 'bold',
         fontSize: 14,
     },
-    // <-- ESTILO DO TEXTO ATIVO (TEXTO AZUL)
     filterButtonTextActive: {
         color: '#0027a6ff',
     },
-    // <-- ESTILOS DA LISTA
     listContainer: {
         flex: 1,
         backgroundColor: '#f3f4f6',
@@ -621,8 +590,8 @@ const styles = StyleSheet.create({
     },
     listContent: {
         padding: 20,
-        paddingTop: 10, // Menos espaço no topo porque os chips já têm margin
-        paddingBottom: 100, // Espaço para o botão de alternância
+        paddingTop: 10, 
+        paddingBottom: 100,
     },
     listCard: {
         flexDirection: 'row',
@@ -657,7 +626,6 @@ const styles = StyleSheet.create({
         color: '#666',
         lineHeight: 20,
     },
-    // <-- BOTÃO DE ALTERNÂNCIA
     toggleButton: {
         position: 'absolute',
         top: 60,
@@ -678,7 +646,6 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 14,
     },
-    // <-- BOTÃO ADMIN FAB
     adminFab: {
         position: 'absolute',
         bottom: 100,
@@ -696,7 +663,6 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.3,
         shadowRadius: 8,
     },
-    // <-- MODAL STYLES
     modalOverlay: {
         flex: 1,
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -765,7 +731,6 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         color: '#fff',
     },
-    // <-- ESTILOS DOS CHIPS (FILTROS HORIZONTAIS NO MODO LISTA)
     chipsContainer: {
         marginBottom: 15,
     },
@@ -790,5 +755,17 @@ const styles = StyleSheet.create({
     },
     chipTextActive: {
         color: '#fff',
+    },
+    emptyContainer: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 60,
+    },
+    emptyText: {
+        fontSize: 16,
+        color: '#999',
+        marginTop: 12,
+        fontWeight: '500',
     },
 });

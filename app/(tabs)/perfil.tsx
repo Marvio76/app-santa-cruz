@@ -54,10 +54,6 @@ export default function PerfilScreen() {
         router.push('/cadastrar-local');
     };
 
-    const handleConfiguracoes = () => {
-        console.log('Configurações');
-    };
-
     return (
         <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
             {/* Topo */}
@@ -98,18 +94,6 @@ export default function PerfilScreen() {
                         </Text>
                     </View>
                     {/* Mudei a seta pra cinza */}
-                    <FontAwesome name="chevron-right" size={20} color="#999" />
-                </TouchableOpacity>
-
-                {/* Botão 3: Configurações */}
-                <TouchableOpacity
-                    style={styles.actionCard}
-                    onPress={handleConfiguracoes}
-                >
-                    <View style={styles.actionCardContent}>
-                        <FontAwesome name="cog" size={24} color="#0027a6ff" />
-                        <Text style={styles.actionCardText}>Configurações</Text>
-                    </View>
                     <FontAwesome name="chevron-right" size={20} color="#999" />
                 </TouchableOpacity>
             </View>

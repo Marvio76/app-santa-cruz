@@ -150,7 +150,11 @@ export default function AdminAprovacaoScreen() {
       return (
         <View style={styles.card}>
           <View style={styles.cardContent}>
-            <View style={styles.cardHeader}>
+            <TouchableOpacity
+              style={styles.cardHeader}
+              onPress={() => router.push({ pathname: '/detalhes-local', params: { id: item.id } })}
+              activeOpacity={0.7}
+            >
               {imageSource ? (
                 <Image source={imageSource} style={styles.thumbnail} resizeMode="cover" />
               ) : (
@@ -166,7 +170,7 @@ export default function AdminAprovacaoScreen() {
                   {item.endereco}
                 </Text>
               </View>
-            </View>
+            </TouchableOpacity>
 
             {/* Action Buttons */}
             <View style={styles.actionRow}>
