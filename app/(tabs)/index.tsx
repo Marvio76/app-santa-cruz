@@ -202,7 +202,9 @@ export default function Index() {
                         status_validacao: item.status_validacao,
                         pinColor: 'orange', 
                     };
-                });
+                })
+                // ✅ FILTRO: Apenas locais com status_validacao === 'aprovado'
+                .filter((item) => String(item.status_validacao || '').toLowerCase().trim() === 'aprovado');
 
             const listaCombinada = [...PONTOS_ESTATICOS, ...normalizados];
             setLocais(listaCombinada);
