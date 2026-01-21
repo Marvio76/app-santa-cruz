@@ -45,7 +45,6 @@ export default function DetalhesLocalScreen() {
           throw new Error(text || 'Falha ao buscar o local');
         }
         const json = await res.json();
-        // Log para debug do que vem da API
         console.log('detalhes-local - foto:', json?.foto);
         setData(json || null);
       } catch (e: any) {
@@ -65,17 +64,14 @@ export default function DetalhesLocalScreen() {
 
     const trimmed = String(foto).trim();
 
-    // URL completa
     if (trimmed.startsWith('http')) {
       return { uri: trimmed } as const;
     }
 
-    // Já tem prefixo data:image
     if (trimmed.startsWith('data:image')) {
       return { uri: trimmed } as const;
     }
 
-    // Assume base64 puro -> prefixa como jpeg
     return { uri: `data:image/jpeg;base64,${trimmed}` } as const;
   }, [data?.foto]);
 
@@ -97,13 +93,14 @@ export default function DetalhesLocalScreen() {
           )}
 
           {/* Floating Back Button */}
+          {/* CORREÇÃO AQUI: O ícone agora é preto (#000) para aparecer no fundo branco */}
           <TouchableOpacity
             onPress={() => router.back()}
             style={styles.backButton}
             activeOpacity={0.8}
             accessibilityLabel="Voltar"
           >
-            <Ionicons name="chevron-back" size={28} color="#fff" />
+            <Ionicons name="chevron-back" size={28} color="#000" />
           </TouchableOpacity>
         </View>
 
@@ -190,7 +187,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)', // Fundo branco
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 6,

@@ -89,6 +89,7 @@ export default function LocalDetalhesScreen() {
           </View>
 
           {/* Ratings Section */}
+          {/* 
           <View style={styles.ratingsSection}>
             <Text style={styles.sectionTitle}>Avaliações</Text>
             <View style={styles.ratingsContainer}>
@@ -96,6 +97,7 @@ export default function LocalDetalhesScreen() {
               <Text style={styles.ratingsText}>(Avaliações em breve)</Text>
             </View>
           </View>
+          */}
         </View>
       </ScrollView>
     </View>
